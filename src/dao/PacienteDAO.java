@@ -70,6 +70,36 @@ public class PacienteDAO {
 		}
 	}
 	
+	public int getNextID() throws SQLException {
+		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			
+			st = this.conn.prepareStatement(
+					"""
+						SELECT
+							max(id_paciente) as id 
+						FROM 
+							pacientes;
+					"""
+					);
+			
+			rs = st.executeQuery();
+			
+			if(rs.next()) {
+				return rs.getInt("id") + 1;
+			} else {
+				return 1;
+			}
+			
+		} finally {
+			BancoDados.finalizarStatement(st);
+			BancoDados.desconectar();
+		}
+	}
+	
 	public int atualizar(Paciente paciente) throws SQLException {
 		
 		PreparedStatement st = null;
