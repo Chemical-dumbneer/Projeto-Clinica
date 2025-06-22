@@ -14,6 +14,8 @@ public class Consulta {
 	
 	public Consulta() {
 		this.status = StatusConsulta.AGENDADA;
+		this.medico = new Medico();
+		this.paciente = new Paciente();
 	}
 	
 	public void setMedico(Medico medico) {

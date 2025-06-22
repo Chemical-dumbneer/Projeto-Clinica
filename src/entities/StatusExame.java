@@ -15,4 +15,13 @@ public enum StatusExame {
 	public int getIndice() {
 		return this.index;
 	}
+	
+	public static StatusExame getStat(int indice) {
+        for (StatusExame status : values()) {
+            if (status.getIndice() == indice) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Valor inválido: " + indice);
+	}
 }

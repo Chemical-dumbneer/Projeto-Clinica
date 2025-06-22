@@ -15,6 +15,9 @@ public class Exame {
 	
 	public Exame() {
 		this.status = StatusExame.AGENDADO;
+		this.medico = new Medico();
+		this.paciente = new Paciente();
+		this.tipoExame = new TipoExame();
 	}
 	
 	public void setMedico(Medico medico) {

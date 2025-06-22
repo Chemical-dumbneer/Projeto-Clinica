@@ -22,7 +22,7 @@ public class Especialidade {
 		this.descricao = descricao;
 	}
 	
-	public String getID() {
+	public String getCbo() {
 		return this.cbo;
 	}
 	

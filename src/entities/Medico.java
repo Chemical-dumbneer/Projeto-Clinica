@@ -17,7 +17,7 @@ public class Medico {
 	private Time duracaoConsulta;
 	
 	public Medico() {
-		
+		this.especialidade = new Especialidade();
 	}
 
 	public String getCrm() {

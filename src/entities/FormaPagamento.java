@@ -9,11 +9,6 @@ public class FormaPagamento {
 		
 	}
 	
-	public FormaPagamento(int id, String descricao) {
-		this.id = id;
-		this.descricao = descricao;
-	}
-	
 	public void setID(int id) {
 		this.id = id;
 	}

@@ -18,6 +18,34 @@ public class FormaPagamentoDAO {
 		this.conn = conn;
 	}
 	
+	public int cadastrar(FormaPagamento fpag) throws SQLException {
+		
+		PreparedStatement st = null;
+		
+		try {
+			
+			st = this.conn.prepareStatement(
+					"""
+						INSERT INTO
+							formas_pagamentos(
+								id_forma_pag,
+								descricao
+							)
+						VALUES (?,?);
+					"""
+					);
+			
+			st.setInt(0, fpag.getID());
+			st.setString(1, fpag.getDescricao());
+			
+			return st.executeUpdate();
+			
+		} finally {
+			BancoDados.finalizarStatement(st);
+			BancoDados.desconectar();
+		}
+	}
+	
 	public int getNextID() throws SQLException {
 		
 		PreparedStatement st = null;
@@ -26,7 +54,12 @@ public class FormaPagamentoDAO {
 		try {
 			
 			st = this.conn.prepareStatement(
-						"SELECT max(id_forma_pag) as id FROM formas_pagamentos;"
+					"""
+						SELECT
+							max(id_forma_pag) as id 
+						FROM 
+							formas_pagamentos;
+					"""
 					);
 			
 			rs = st.executeQuery();
@@ -40,7 +73,6 @@ public class FormaPagamentoDAO {
 		} finally {
 			BancoDados.finalizarStatement(st);
 			BancoDados.desconectar();
-			
 		}
 	}
 	
@@ -51,30 +83,38 @@ public class FormaPagamentoDAO {
 		FormaPagamento fpag = null;
 		try {
 			
-			st = this.conn.prepareStatement("SELECT id_forma_pag, descricao FROM formas_pagamentos WHERE id_forma_pag = ?");
+			st = this.conn.prepareStatement(
+					"""
+						SELECT 
+							id_forma_pag, 
+							descricao 
+						FROM 
+							formas_pagamentos 
+						WHERE 
+							id_forma_pag = ?;
+					"""
+					);
 			
-			st.setInt(1, id);
+			st.setInt(0, id);
 			
 			rs = st.executeQuery();
 			
 			if(rs.next()) {
-				fpag = new FormaPagamento(
-							rs.getInt("id_forma_pag"),
-							rs.getString("descricao")
-						);
+				fpag = new FormaPagamento();
+				
+				fpag.setID(rs.getInt("id_forma_pag"));
+				fpag.setDescricao(rs.getString("descricao"));
+				
 				return fpag;
 			} else {
 				throw new ObjetoNaoExisteException(fpag);
 			}
 			
 		} finally {
-			
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
 			BancoDados.desconectar();
-			
 		}
-		
 	}
 	
 	public List<FormaPagamento> getAll() throws SQLException, ObjetoNaoExisteException{
@@ -86,7 +126,15 @@ public class FormaPagamentoDAO {
 		
 		try {
 			
-			st = this.conn.prepareStatement("SELECT id_forma_pag, descricao FROM formas_pagamentos");
+			st = this.conn.prepareStatement(
+					"""
+						SELECT 
+							id_forma_pag, 
+							descricao 
+						FROM 
+							formas_pagamentos;
+					"""
+					);
 			
 			rs = st.executeQuery();
 			
@@ -106,13 +154,9 @@ public class FormaPagamentoDAO {
 			return listaFormas;
 			
 		} finally {
-			
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
 			BancoDados.desconectar();
-		
-		}
-		
-		
+		}	
 	}
 }
