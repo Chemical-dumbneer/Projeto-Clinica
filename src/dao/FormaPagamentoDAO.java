@@ -46,6 +46,34 @@ public class FormaPagamentoDAO {
 		}
 	}
 	
+	public int atualizar(FormaPagamento fpag) throws SQLException {
+		
+		PreparedStatement st = null;
+		
+		try {
+			
+			st = this.conn.prepareStatement(
+					"""
+						UPDATE
+							formas_pagamentos
+						SET
+							descricao = ?
+						WHERE
+							id_forma_pag = ?;
+					"""
+					);
+			
+			st.setString(0, fpag.getDescricao());
+			st.setInt(1, fpag.getID());
+			
+			return st.executeUpdate();
+			
+		} finally {
+			BancoDados.finalizarStatement(st);
+			BancoDados.desconectar();
+		}
+	}
+	
 	public int getNextID() throws SQLException {
 		
 		PreparedStatement st = null;

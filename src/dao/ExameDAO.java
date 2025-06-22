@@ -30,23 +30,25 @@ public class ExameDAO {
 			st = this.conn.prepareStatement(
 					"""
 						INSERT INTO
-							consultas(
+							exames(
 								crm,
 								id_paciente,
+								id_exame,
 								data_hora,
 								data_hora_fim,
 								valor,
 								status
 							)
-						VALUES (?,?,?,?,?,?);
+						VALUES (?,?,?,?,?,?,?);
 					"""
 					);
 			st.setString(0, exame.getMedico().getCrm());
 			st.setInt(1, exame.getPaciente().getId());
-			st.setTimestamp(2, exame.getDataIni());
-			st.setTimestamp(3, exame.getDataFim());
-			st.setDouble(4, exame.getValor());
-			st.setInt(5, exame.getStatusConsulta().getIndice());
+			st.setInt(2, exame.getTipoExame().getId());
+			st.setTimestamp(3, exame.getDataIni());
+			st.setTimestamp(4, exame.getDataFim());
+			st.setDouble(5, exame.getValor());
+			st.setInt(6, exame.getStatusConsulta().getIndice());
 			
 			return st.executeUpdate();
 			
@@ -56,7 +58,7 @@ public class ExameDAO {
 		}
 	}
 	
-	public int atualizar(Exame consulta) throws SQLException {
+	public int atualizar(Exame exame) throws SQLException {
 		
 		PreparedStatement st = null;
 		
@@ -64,7 +66,7 @@ public class ExameDAO {
 			st = this.conn.prepareStatement(
 					"""
 						UPDATE 
-							consultas
+							exames
 						SET	
 							data_hora_fim = ?,
 							valor = ?,
@@ -72,16 +74,18 @@ public class ExameDAO {
 						WHERE
 							crm = ? AND
 							id_paciente = ? AND
-							data_hora = ?
+							id_exame = ? AND
+							data_hora = ?;
 					"""
 					);
-			st.setTimestamp(0, consulta.getDataFim());
-			st.setDouble(1, consulta.getValor());
-			st.setInt(2, consulta.getStatusConsulta().getIndice());
+			st.setTimestamp(0, exame.getDataFim());
+			st.setDouble(1, exame.getValor());
+			st.setInt(2, exame.getStatusConsulta().getIndice());
 			
-			st.setString(3, consulta.getMedico().getCrm());
-			st.setInt(4, consulta.getPaciente().getId());
-			st.setTimestamp(5, consulta.getDataIni());
+			st.setString(3, exame.getMedico().getCrm());
+			st.setInt(4, exame.getPaciente().getId());
+			st.setInt(5, exame.getTipoExame().getId());
+			st.setTimestamp(6, exame.getDataIni());
 			
 			return st.executeUpdate();
 			
@@ -91,7 +95,7 @@ public class ExameDAO {
 		}
 	}
 	
-	public int reagendar(Exame consulta, Timestamp novaDataHora) throws SQLException {
+	public int reagendar(Exame exame, Timestamp novaDataHora) throws SQLException {
 		
 		PreparedStatement st = null;
 		
@@ -99,20 +103,22 @@ public class ExameDAO {
 			st = this.conn.prepareStatement(
 					"""
 						UPDATE 
-							consultas
+							exames
 						SET	
 							data_hora = ?
 						WHERE
 							crm = ? AND
 							id_paciente = ? AND
-							data_hora = ?
+							data_hora = ? AND
+							id_exame = ?;
 					"""
 					);
 			st.setTimestamp(0, novaDataHora);
 			
-			st.setString(1, consulta.getMedico().getCrm());
-			st.setInt(2, consulta.getPaciente().getId());
-			st.setTimestamp(3, consulta.getDataIni());
+			st.setString(1, exame.getMedico().getCrm());
+			st.setInt(2, exame.getPaciente().getId());
+			st.setTimestamp(3, exame.getDataIni());
+			st.setInt(4, exame.getTipoExame().getId());
 			
 			return st.executeUpdate();
 			
@@ -122,11 +128,11 @@ public class ExameDAO {
 		}
 	}
 	
-	public Exame getConsulta(Medico medico, Paciente paciente, Timestamp dataHora) throws SQLException, ObjetoNaoExisteException {
+	public Exame getExame(Medico medico, Paciente paciente, TipoExame tipoExame, Timestamp dataHora) throws SQLException, ObjetoNaoExisteException {
 		
 		PreparedStatement st = null;
 		ResultSet rs = null;
-		Consulta consulta = new Consulta();
+		Exame exame = new Exame();
 		
 		try {
 			st = this.conn.prepareStatement(
@@ -139,31 +145,33 @@ public class ExameDAO {
 						valor,
 						status
 					FROM
-						consultas
+						exames
 					WHERE
 						crm = ? AND
 						id_paciente = ? AND
-						data_hora = ?;
+						data_hora = ? AND
+						id_exame = ?;
 					"""
 					);
 			st.setString(0, medico.getCrm());
 			st.setInt(1, paciente.getId());
 			st.setTimestamp(2, dataHora);
+			st.setInt(3, tipoExame.getId());
 			
 			rs = st.executeQuery();
 			if(rs.next()) {
-				consulta.setMedico(medico);
-				consulta.setPaciente(paciente);
-				consulta.setDataIni(dataHora);
+				exame.setMedico(medico);
+				exame.setPaciente(paciente);
+				exame.setDataIni(dataHora);
 				
-				consulta.setDataFim(rs.getTimestamp("data_hora_fim"));
-				consulta.setValor(rs.getDouble("valor"));
-				consulta.setStatus(StatusConsulta.getStat(rs.getInt("status")));
+				exame.setDataFim(rs.getTimestamp("data_hora_fim"));
+				exame.setValor(rs.getDouble("valor"));
+				exame.setStatus(StatusExame.getStat(rs.getInt("status")));
 			} else {
-				throw new ObjetoNaoExisteException(consulta);
+				throw new ObjetoNaoExisteException(exame);
 			}
 			
-			return consulta;
+			return exame;
 		} finally {
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
@@ -171,11 +179,11 @@ public class ExameDAO {
 		}
 	}
 	
-	public List<Consulta> getConsultasMedico(Medico medico, Timestamp inicioIntervalo, Timestamp finalIntervalo) throws SQLException, ObjetoNaoExisteException {
+	public List<Exame> getExamesMedico(Medico medico, Timestamp inicioIntervalo, Timestamp finalIntervalo) throws SQLException, ObjetoNaoExisteException {
 		
 		PreparedStatement st = null;
 		ResultSet rs = null;
-		List<Consulta> consultas = new ArrayList<Consulta>();
+		List<Exame> exames = new ArrayList<Exame>();
 		
 		try {
 			st = this.conn.prepareStatement(
@@ -183,37 +191,39 @@ public class ExameDAO {
 					SELECT
 						crm,
 						id_paciente,
+						id_exame,
 						data_hora,
 						data_hora_fim,
 						valor,
 						status
 					FROM
-						consultas
+						exames
 					WHERE
 						crm = ? AND
 						data_hora BETWEEN ? AND ?;
 					"""
-					);;
+					);
 			st.setString(0, medico.getCrm());
 			st.setTimestamp(1, inicioIntervalo);
 			st.setTimestamp(2, finalIntervalo);
 			
 			rs = st.executeQuery();
 			while(rs.next()) {
-				Consulta consulta = new Consulta();
+				Exame exame = new Exame();
 				
-				consulta.setMedico(medico);
+				exame.setMedico(medico);
 				
-				consulta.getPaciente().setId(rs.getInt("id_paciente"));
-				consulta.setDataIni(rs.getTimestamp("data_hora"));
-				consulta.setDataFim(rs.getTimestamp("data_hora_fim"));
-				consulta.setValor(rs.getDouble("valor"));
-				consulta.setStatus(StatusConsulta.getStat(rs.getInt("status")));
+				exame.getTipoExame().setId(rs.getInt("id_exame"));
+				exame.getPaciente().setId(rs.getInt("id_paciente"));
+				exame.setDataIni(rs.getTimestamp("data_hora"));
+				exame.setDataFim(rs.getTimestamp("data_hora_fim"));
+				exame.setValor(rs.getDouble("valor"));
+				exame.setStatus(StatusExame.getStat(rs.getInt("status")));
 				
-				consultas.add(consulta);
+				exames.add(exame);
 			}
 			
-			return consultas;
+			return exames;
 		} finally {
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
@@ -221,4 +231,54 @@ public class ExameDAO {
 		}
 	}
 	
+	public List<Exame> getExamesTipo(TipoExame tipoExame, Timestamp inicioIntervalo, Timestamp finalIntervalo) throws SQLException, ObjetoNaoExisteException {
+		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		List<Exame> exames = new ArrayList<Exame>();
+		
+		try {
+			st = this.conn.prepareStatement(
+					"""
+					SELECT
+						crm,
+						id_paciente,
+						id_exame,
+						data_hora,
+						data_hora_fim,
+						valor,
+						status
+					FROM
+						exames
+					WHERE
+						id_exame = ? AND
+						data_hora BETWEEN ? AND ?;
+					"""
+					);
+			st.setInt(0, tipoExame.getId());
+			st.setTimestamp(1, inicioIntervalo);
+			st.setTimestamp(2, finalIntervalo);
+			
+			rs = st.executeQuery();
+			while(rs.next()) {
+				Exame exame = new Exame();
+				
+				exame.setTipoExame(tipoExame);
+				exame.getMedico().setCrm(rs.getString("crm"));
+				exame.getPaciente().setId(rs.getInt("id_paciente"));
+				exame.setDataIni(rs.getTimestamp("data_hora"));
+				exame.setDataFim(rs.getTimestamp("data_hora_fim"));
+				exame.setValor(rs.getDouble("valor"));
+				exame.setStatus(StatusExame.getStat(rs.getInt("status")));
+				
+				exames.add(exame);
+			}
+			
+			return exames;
+		} finally {
+			BancoDados.finalizarStatement(st);
+			BancoDados.finalizarResultSet(rs);
+			BancoDados.desconectar();
+		}
+	}
 }

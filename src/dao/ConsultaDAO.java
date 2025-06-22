@@ -72,7 +72,7 @@ public class ConsultaDAO {
 						WHERE
 							crm = ? AND
 							id_paciente = ? AND
-							data_hora = ?
+							data_hora = ?;
 					"""
 					);
 			st.setTimestamp(0, consulta.getDataFim());
@@ -105,7 +105,7 @@ public class ConsultaDAO {
 						WHERE
 							crm = ? AND
 							id_paciente = ? AND
-							data_hora = ?
+							data_hora = ?;
 					"""
 					);
 			st.setTimestamp(0, novaDataHora);

@@ -46,6 +46,34 @@ public class EspecialidadeDAO {
 		}
 	}
 	
+	public int atualizar(Especialidade espec) throws SQLException {
+		
+		PreparedStatement st = null;
+		
+		try {
+			
+			st = this.conn.prepareStatement(
+					"""
+						UPDATE
+							especialidades
+						SET
+							descricao = ?
+						WERE
+							cbo = ?;
+					"""
+					);
+			
+			st.setString(0, espec.getDescricao());
+			st.setString(1, espec.getCbo());
+			
+			return st.executeUpdate();
+			
+		} finally {
+			BancoDados.finalizarStatement(st);
+			BancoDados.desconectar();
+		}
+	}
+	
 	public Especialidade getByCBO(String cbo) throws SQLException, ObjetoNaoExisteException {
 		
 		PreparedStatement st = null;
