@@ -1,14 +1,14 @@
 package entities;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class Consulta {
 	
-	private String crm;
-	private int id_paciente;
-	private Date data_hora;
+	private Medico medico;
+	private Paciente paciente;
+	private Timestamp dataHora;
 	
-	private Date data_hora_fim;
+	private Timestamp dataHoraFim;
 	private double valor;
 	private StatusConsulta status;
 	
@@ -16,36 +16,36 @@ public class Consulta {
 		this.status = StatusConsulta.AGENDADA;
 	}
 	
-	public void setCrm(String crm) {
-		this.crm = crm;
+	public void setMedico(Medico medico) {
+		this.medico = medico;
 	}
 	
-	public String getCrm() {
-		return this.crm;
+	public Medico getMedico() {
+		return this.medico;
 	}
 	
-	public void setIdPaciente(int idPaciente) {
-		this.id_paciente = idPaciente;
+	public void setPaciente(Paciente paciente) {
+		this.paciente = paciente;
 	}
 	
-	public int getIdPaciente() {
-		return this.id_paciente;
+	public Paciente getPaciente() {
+		return this.paciente;
 	}
 	
-	public void setDataIni(Date data_hora) {
-		this.data_hora = data_hora;
+	public void setDataIni(Timestamp data_hora) {
+		this.dataHora = data_hora;
 	}
 	
-	public Date getDataIni() {
-		return this.data_hora;
+	public Timestamp getDataIni() {
+		return this.dataHora;
 	}
 	
-	public void setDataFim(Date data_hora_fim) {
-		this.data_hora_fim = data_hora_fim;
+	public void setDataFim(Timestamp data_hora_fim) {
+		this.dataHoraFim = data_hora_fim;
 	}
 	
-	public Date getDataFim() {
-		return this.data_hora_fim;
+	public Timestamp getDataFim() {
+		return this.dataHoraFim;
 	}
 	
 	public void setValor(double valor) {
