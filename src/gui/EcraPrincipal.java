@@ -18,16 +18,30 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 import java.awt.Component;
 import javax.swing.Box;
-import javax.swing.JList;
-import javax.swing.JTable;
-import java.awt.GridLayout;
-import java.awt.FlowLayout;
-import javax.swing.SpringLayout;
+import java.awt.event.ActionListener;
+import java.beans.PropertyVetoException;
+import java.awt.event.ActionEvent;
+import java.awt.Dimension;
 
 public class EcraPrincipal {
 
 	private JFrame frmSistemaDeGesto;
-
+	public JDesktopPane janelaPrincipal;
+	public JMenuItem mntmAddPaciente;
+	public JMenuItem mntmFormasPag;
+	public JMenuItem mntmMedicos;
+	public JMenuItem mntmEspecialidade;
+	public JMenuItem mntmTipoExames;
+	public JMenuItem mntmNovaConsulta;
+	public JMenuItem mntmEditarConsulta;
+	public JMenuItem mntmNovoExame;
+	public JMenuItem mntmEditarExames;
+	public JMenuItem mntmRelAgendaMedico;
+	public JMenuItem mntmRelAgendaExames;
+	public JMenuItem mntmRelHistoricoPaciente;
+	public JMenuItem mntmMostrarSobre;
+	private JButton btnLogoff;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -50,6 +64,70 @@ public class EcraPrincipal {
 			}
 		});
 	}
+	
+	/**
+	 * Métodos de inserção de janelas
+	 */
+	public void abrirAgendaConsulta() {
+		AgendaConsulta agendaConsulta = new AgendaConsulta(this);
+		this.mntmRelAgendaMedico.setEnabled(false);
+		this.janelaPrincipal.add(agendaConsulta);
+	}
+
+	public void abrirAgendaExame() {
+		AgendaExame agendaExame = new AgendaExame(this);
+		this.mntmRelAgendaExames.setEnabled(false);
+		this.janelaPrincipal.add(agendaExame);
+	}
+
+	public void abrirEditConsulta() {
+		EditConsulta editConsulta = new EditConsulta(this);
+		this.mntmEditarConsulta.setEnabled(false);
+		this.janelaPrincipal.add(editConsulta);
+	}
+
+	public void abrirEditEspecialidade() {
+		EditEspecialidade editEspecialidade = new EditEspecialidade(this);
+		this.mntmEspecialidade.setEnabled(false);
+		this.janelaPrincipal.add(editEspecialidade);
+	}
+
+	public void abrirEditExame() {
+		EditExame editExame = new EditExame(this);
+		this.mntmEditarExames.setEnabled(false);
+		this.janelaPrincipal.add(editExame);
+	}
+
+	public void abrirEditFormaPag() {
+		EditFormaPag editFormaPag = new EditFormaPag(this);
+		this.mntmFormasPag.setEnabled(false);
+		this.janelaPrincipal.add(editFormaPag);
+	}
+
+	public void abrirEditMedico() {
+		EditMedico editMedico = new EditMedico(this);
+		this.mntmMedicos.setEnabled(false);
+		this.janelaPrincipal.add(editMedico);
+	}
+
+	public void abrirEditPaciente() {
+		EditPaciente editPaciente = new EditPaciente(this);
+		this.mntmAddPaciente.setEnabled(false);
+		editPaciente.setVisible(true);
+		try {
+			editPaciente.setMaximum(true);
+		} catch (PropertyVetoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.janelaPrincipal.add(editPaciente);
+	}
+
+	public void abrirEditTipoExame() {
+		EditTipoExame editTipoExame = new EditTipoExame(this);
+		this.mntmTipoExames.setEnabled(false);
+		this.janelaPrincipal.add(editTipoExame);
+	}
 
 	/**
 	 * Create the application.
@@ -71,51 +149,85 @@ public class EcraPrincipal {
 		frmSistemaDeGesto.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JSplitPane divJanelaPrincipal = new JSplitPane();
-		frmSistemaDeGesto.getContentPane().add(divJanelaPrincipal);
+		frmSistemaDeGesto.getContentPane().add(divJanelaPrincipal, BorderLayout.WEST);
 		
 		JSplitPane divAbaLAteral = new JSplitPane();
+		divAbaLAteral.setResizeWeight(1.0);
 		divJanelaPrincipal.setLeftComponent(divAbaLAteral);
 		divAbaLAteral.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		
 		JPanel panel = new JPanel();
+		panel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+		panel.setMaximumSize(new Dimension(32767, 60));
 		divAbaLAteral.setRightComponent(panel);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel_2 = new JPanel();
+		panel_2.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+		panel_2.setMaximumSize(new Dimension(32767, 30));
+		panel.add(panel_2, BorderLayout.NORTH);
+		
+		Component verticalStrut_1 = Box.createVerticalStrut(20);
+		panel.add(verticalStrut_1, BorderLayout.NORTH);
+		
+		Component verticalStrut_2 = Box.createVerticalStrut(20);
+		panel.add(verticalStrut_2, BorderLayout.SOUTH);
+		
+		JPanel panel_5 = new JPanel();
+		panel.add(panel_5, BorderLayout.CENTER);
+		panel_5.setLayout(new BoxLayout(panel_5, BoxLayout.Y_AXIS));
 		
 		JPanel panel_1 = new JPanel();
-		panel.add(panel_1);
+		panel_5.add(panel_1);
+		panel_1.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+		panel_1.setMaximumSize(new Dimension(32767, 30));
 		
 		JLabel lblUserLabel = new JLabel("Usuário:");
+		lblUserLabel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 		panel_1.add(lblUserLabel);
 		
 		JLabel lblUserName = new JLabel("[nome usuario]");
+		lblUserName.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 		panel_1.add(lblUserName);
 		
-		JPanel panel_2 = new JPanel();
-		panel.add(panel_2);
+		btnLogoff = new JButton("Trocar Usuário");
+		panel_5.add(btnLogoff);
+		btnLogoff.setAlignmentX(Component.CENTER_ALIGNMENT);
+		btnLogoff.setAlignmentY(Component.BOTTOM_ALIGNMENT);
 		
-		JButton btnLogoff = new JButton("Trocar Usuário");
-		panel_2.add(btnLogoff);
+		Component horizontalStrut_2 = Box.createHorizontalStrut(20);
+		panel.add(horizontalStrut_2, BorderLayout.EAST);
+		
+		Component horizontalStrut_3 = Box.createHorizontalStrut(20);
+		panel.add(horizontalStrut_3, BorderLayout.WEST);
 		
 		JPanel panel_3 = new JPanel();
 		divAbaLAteral.setLeftComponent(panel_3);
-		panel_3.setLayout(new BoxLayout(panel_3, BoxLayout.Y_AXIS));
+		panel_3.setLayout(new BorderLayout(0, 0));
+		
+		Component verticalStrut = Box.createVerticalStrut(20);
+		panel_3.add(verticalStrut, BorderLayout.NORTH);
+		
+		Component horizontalStrut = Box.createHorizontalStrut(20);
+		panel_3.add(horizontalStrut, BorderLayout.WEST);
+		
+		Component horizontalStrut_1 = Box.createHorizontalStrut(20);
+		panel_3.add(horizontalStrut_1, BorderLayout.EAST);
 		
 		JPanel panel_4 = new JPanel();
-		panel_3.add(panel_4);
-		panel_4.setLayout(new BoxLayout(panel_4, BoxLayout.X_AXIS));
+		panel_3.add(panel_4, BorderLayout.CENTER);
+		panel_4.setLayout(new BoxLayout(panel_4, BoxLayout.Y_AXIS));
 		
 		JLabel lblNotificacoes = new JLabel("Notificações");
+		lblNotificacoes.setAlignmentX(Component.CENTER_ALIGNMENT);
 		panel_4.add(lblNotificacoes);
 		
 		JPanel visaoUsuario = new JPanel();
 		divJanelaPrincipal.setRightComponent(visaoUsuario);
 		visaoUsuario.setLayout(new BoxLayout(visaoUsuario, BoxLayout.Y_AXIS));
 		
-		Component horizontalGlue = Box.createHorizontalGlue();
-		visaoUsuario.add(horizontalGlue);
-		
-		JDesktopPane desktopPane = new JDesktopPane();
-		visaoUsuario.add(desktopPane);
+		janelaPrincipal = new JDesktopPane();
+		frmSistemaDeGesto.getContentPane().add(janelaPrincipal, BorderLayout.CENTER);
 		
 		JMenuBar menuBar = new JMenuBar();
 		frmSistemaDeGesto.setJMenuBar(menuBar);
@@ -126,25 +238,30 @@ public class EcraPrincipal {
 		JMenu mnSubMenuPacientes = new JMenu("Pacientes");
 		mnMenuCadastros.add(mnSubMenuPacientes);
 		
-		JMenuItem mntmAddPaciente = new JMenuItem("Adicionar/Editar");
+		mntmAddPaciente = new JMenuItem("Adicionar/Editar");
+		mntmAddPaciente.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				abrirEditPaciente();
+			}
+		});
 		mnSubMenuPacientes.add(mntmAddPaciente);
 		
-		JMenuItem mntmFormasPag = new JMenuItem("Formas de Pagamento");
+		mntmFormasPag = new JMenuItem("Formas de Pagamento");
 		mnSubMenuPacientes.add(mntmFormasPag);
 		
 		JMenu mnSubMenuMedicos = new JMenu("Medicos");
 		mnMenuCadastros.add(mnSubMenuMedicos);
 		
-		JMenuItem mntmMedicos = new JMenuItem("Adicionar/Editar");
+		mntmMedicos = new JMenuItem("Adicionar/Editar");
 		mnSubMenuMedicos.add(mntmMedicos);
 		
-		JMenuItem mntmEspecialidade = new JMenuItem("Especialidades");
+		mntmEspecialidade = new JMenuItem("Especialidades");
 		mnSubMenuMedicos.add(mntmEspecialidade);
 		
 		JMenu mnSubMenuExames = new JMenu("Exames");
 		mnMenuCadastros.add(mnSubMenuExames);
 		
-		JMenuItem mntmTipoExames = new JMenuItem("Adicionar/Editar");
+		mntmTipoExames = new JMenuItem("Adicionar/Editar");
 		mnSubMenuExames.add(mntmTipoExames);
 		
 		JMenu mnMenuAgenda = new JMenu("Agenda");
@@ -153,37 +270,37 @@ public class EcraPrincipal {
 		JMenu mnSubMenuConsulta = new JMenu("Consultas");
 		mnMenuAgenda.add(mnSubMenuConsulta);
 		
-		JMenuItem mntmNovaConsulta = new JMenuItem("Agendar");
+		mntmNovaConsulta = new JMenuItem("Agendar");
 		mnSubMenuConsulta.add(mntmNovaConsulta);
 		
-		JMenuItem mntmEditarConsulta = new JMenuItem("Editar");
+		mntmEditarConsulta = new JMenuItem("Editar");
 		mnSubMenuConsulta.add(mntmEditarConsulta);
 		
 		JMenu mnSubMenuAgExames = new JMenu("Exames");
 		mnMenuAgenda.add(mnSubMenuAgExames);
 		
-		JMenuItem mntmNovoExame = new JMenuItem("Agendar");
+		mntmNovoExame = new JMenuItem("Agendar");
 		mnSubMenuAgExames.add(mntmNovoExame);
 		
-		JMenuItem mntmEditarExames = new JMenuItem("Editar");
+		mntmEditarExames = new JMenuItem("Editar");
 		mnSubMenuAgExames.add(mntmEditarExames);
 		
 		JMenu mnMenuRelatorios = new JMenu("Relatórios");
 		menuBar.add(mnMenuRelatorios);
 		
-		JMenuItem mntmRelAgendaMedico = new JMenuItem("Agenda de médicos");
+		mntmRelAgendaMedico = new JMenuItem("Agenda de médicos");
 		mnMenuRelatorios.add(mntmRelAgendaMedico);
 		
-		JMenuItem mntmRelAgendaExames = new JMenuItem("Agenda de Exames");
+		mntmRelAgendaExames = new JMenuItem("Agenda de Exames");
 		mnMenuRelatorios.add(mntmRelAgendaExames);
 		
-		JMenuItem mntmRelHistoricoPaciente = new JMenuItem("Histórico de Paciente");
+		mntmRelHistoricoPaciente = new JMenuItem("Histórico de Paciente");
 		mnMenuRelatorios.add(mntmRelHistoricoPaciente);
 		
 		JMenu mnMenuSobre = new JMenu("Sobre");
 		menuBar.add(mnMenuSobre);
 		
-		JMenuItem mntmMostrarSobre = new JMenuItem("Sistema");
+		mntmMostrarSobre = new JMenuItem("Sistema");
 		mnMenuSobre.add(mntmMostrarSobre);
 	}
 }
