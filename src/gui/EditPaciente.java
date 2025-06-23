@@ -4,6 +4,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JSeparator;
 import javax.swing.JScrollPane;
@@ -14,6 +15,9 @@ import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
 
 import entities.FormaPagamento;
+import entities.Paciente;
+import service.PacienteService;
+import service.FormaPagamentoService;
 
 import java.awt.FlowLayout;
 import java.awt.Image;
@@ -21,34 +25,81 @@ import java.awt.Image;
 import javax.swing.JButton;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.border.BevelBorder;
+
+import customExceptions.ObjetoNaoExisteException;
+import javax.swing.Icon;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 public class EditPaciente extends JInternalFrame {
 
 	private static final long serialVersionUID = 1L;
 	private EcraPrincipal janelaMae;
-	private final JTextField textField = new JTextField();
+	private final JTextField txtIdPaciente = new JTextField();
 	private JTextField txtNome;
 	private JTextField txtCidade;
 	private JTextField txtBairro;
 	private JTextField txtRua;
 	private JTextField txtNumero;
+	private JComboBox<String> cbSexo;
+	private JButton btnAlterarFoto;
+	private JFormattedTextField ftxTelefone;
+	private JFormattedTextField ftxDataNascimento;
+	private JComboBox<FormaPagamento> cbFormaPag;
+	private JFormattedTextField ftxCep;
+	private JComboBox<?> cbEstado;
+	private JButton btnAplicar;
+	
+	private List<JComponent> grupoHabilitavel;
+	private List<JComponent> grupoCEP;
 	
 	public void fecharJanela() {
 		this.dispose();
 		this.janelaMae.mntmAddPaciente.setEnabled(true);
+	}
+	
+	private void buscaPaciente() {
+		Paciente paciente = null;
+		try {
+			paciente = new PacienteService().buscarPorID(Integer.valueOf(txtIdPaciente.getText()));
+		} catch (ObjetoNaoExisteException o) {
+			paciente = new Paciente();
+		} catch (NumberFormatException | SQLException | IOException e) {
+			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro ao buscar dados de pacientes", JOptionPane.ERROR_MESSAGE);
+		}
+		this.populaDadosPaciente(paciente);
+	}
+	
+	private void populaDadosPaciente(Paciente paciente) {
+		
 	}
 	/**
 	 * Create the frame.
 	 */
 	public EditPaciente(EcraPrincipal janelaMae) {
 		this.janelaMae = janelaMae;
+		this.initComponentes();
+		this.populaCbSexo();
+		this.populaCbFormasPag();
+		
+		for(JComponent comp : this.grupoHabilitavel) {
+			comp.setEnabled(false);
+		}
+	}
+	
+	private void initComponentes() {
 		setTitle("Editar Cadastro de Paciente");
 		setBounds(100, 100, 818, 608);
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
@@ -69,8 +120,7 @@ public class EditPaciente extends JInternalFrame {
 		panel_2.setMaximumSize(new Dimension(100, 60));
 		panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.Y_AXIS));
 		
-		JButton btnAplicar = new JButton("Aplicar");
-		btnAplicar.setEnabled(false);
+		btnAplicar = new JButton("Aplicar");
 		btnAplicar.setPreferredSize(new Dimension(150, 23));
 		btnAplicar.setMaximumSize(new Dimension(150, 23));
 		btnAplicar.setAlignmentX(Component.RIGHT_ALIGNMENT);
@@ -98,11 +148,18 @@ public class EditPaciente extends JInternalFrame {
 		
 		JLabel lblIdPaciente = new JLabel("Código do Paciente:");
 		panel_1.add(lblIdPaciente);
-		panel_1.add(textField);
-		textField.setHorizontalAlignment(SwingConstants.CENTER);
-		textField.setSize(new Dimension(100, 20));
-		textField.setMaximumSize(new Dimension(200, 30));
-		textField.setColumns(10);
+		txtIdPaciente.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				buscaPaciente();
+				txtIdPaciente.setEnabled(false);
+				btnAplicar.setEnabled(true);
+			}
+		});
+		panel_1.add(txtIdPaciente);
+		txtIdPaciente.setHorizontalAlignment(SwingConstants.CENTER);
+		txtIdPaciente.setSize(new Dimension(100, 20));
+		txtIdPaciente.setMaximumSize(new Dimension(200, 30));
+		txtIdPaciente.setColumns(10);
 		
 		JSeparator separator = new JSeparator();
 		getContentPane().add(separator);
@@ -137,14 +194,12 @@ public class EditPaciente extends JInternalFrame {
 		Image img = icone.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
 		ImageIcon iconeRedimensionado = new ImageIcon(img);
 		JLabel lblFotoPaciente = new JLabel(iconeRedimensionado);
-		lblFotoPaciente.setEnabled(false);
 		lblFotoPaciente.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		lblFotoPaciente.setAlignmentX(Component.CENTER_ALIGNMENT);
 		panel_3.add(lblFotoPaciente);
 		lblFotoPaciente.setVerticalAlignment(SwingConstants.TOP);
 		
-		JButton btnAlterarFoto = new JButton("Mudar Foto");
-		btnAlterarFoto.setEnabled(false);
+		btnAlterarFoto = new JButton("Mudar Foto");
 		btnAlterarFoto.setAlignmentX(Component.CENTER_ALIGNMENT);
 		panel_3.add(btnAlterarFoto);
 		
@@ -152,77 +207,66 @@ public class EditPaciente extends JInternalFrame {
 		dadosPaciente.setRightComponent(zonaDados);
 		
 		JLabel lblNome = new JLabel("Nome do Paciente:");
-		lblNome.setEnabled(false);
 		
 		txtNome = new JTextField();
-		txtNome.setEnabled(false);
 		txtNome.setColumns(10);
 		
 		JLabel lblSexo = new JLabel("Sexo:");
-		lblSexo.setEnabled(false);
 		
-		JComboBox<?> cbSexo = new JComboBox<Object>();
-		cbSexo.setEnabled(false);
+		cbSexo = new JComboBox<String>();
 		
 		JLabel lblTelefone = new JLabel("Telefone:");
-		lblTelefone.setEnabled(false);
 		
-		JFormattedTextField ftxTelefone = new JFormattedTextField();
-		ftxTelefone.setEnabled(false);
+		ftxTelefone = new JFormattedTextField();
 		
 		JLabel lblDataNascimento = new JLabel("Data de Nascimento:");
-		lblDataNascimento.setEnabled(false);
 		
-		JFormattedTextField ftxDataNascimento = new JFormattedTextField();
-		ftxDataNascimento.setEnabled(false);
+		ftxDataNascimento = new JFormattedTextField();
 		
 		JLabel lblFormaPagamento = new JLabel("Forma de Pagamento:");
-		lblFormaPagamento.setEnabled(false);
 		
-		JComboBox<FormaPagamento> cbFormaPag = new JComboBox<FormaPagamento>();
-		cbFormaPag.setEnabled(false);
+		cbFormaPag = new JComboBox<FormaPagamento>();
 		
 		JLabel lblCep = new JLabel("CEP:");
-		lblCep.setEnabled(false);
 		
-		JFormattedTextField ftxCep = new JFormattedTextField();
-		ftxCep.setEnabled(false);
+		ftxCep = new JFormattedTextField();
 		
 		JLabel lblEstado = new JLabel("Estado:");
-		lblEstado.setEnabled(false);
 		
-		JComboBox<?> cbEstado = new JComboBox<Object>();
-		cbEstado.setEnabled(false);
+		cbEstado = new JComboBox<Object>();
 		
 		JLabel lblCidade = new JLabel("Cidade:");
-		lblCidade.setEnabled(false);
 		
 		txtCidade = new JTextField();
-		txtCidade.setEnabled(false);
 		txtCidade.setColumns(10);
 		
 		JLabel lblBairro = new JLabel("Bairro:");
-		lblBairro.setEnabled(false);
 		lblBairro.setHorizontalAlignment(SwingConstants.RIGHT);
 		
 		txtBairro = new JTextField();
-		txtBairro.setEnabled(false);
 		txtBairro.setColumns(10);
 		
 		JLabel lblRua = new JLabel("Rua:");
-		lblRua.setEnabled(false);
 		lblRua.setHorizontalAlignment(SwingConstants.RIGHT);
 		
 		txtRua = new JTextField();
-		txtRua.setEnabled(false);
 		txtRua.setColumns(10);
 		
 		JLabel lblNumeroRua = new JLabel("Numero:");
-		lblNumeroRua.setEnabled(false);
 		
 		txtNumero = new JTextField();
-		txtNumero.setEnabled(false);
 		txtNumero.setColumns(10);
+		
+		ImageIcon gifzin = new ImageIcon(getClass().getResource("/resources/loadingIcon.gif"));
+		Image gif = gifzin.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+		ImageIcon gifRedim = new ImageIcon(gif);
+		JLabel lblCarregando = new JLabel(gifRedim);
+		lblCarregando.setVisible(true);
+		
+		lblCarregando.setVerticalAlignment(SwingConstants.TOP);
+		lblCarregando.setBorder(null);
+		lblCarregando.setAlignmentX(0.5f);
+		
 		GroupLayout gl_zonaDados = new GroupLayout(zonaDados);
 		gl_zonaDados.setHorizontalGroup(
 			gl_zonaDados.createParallelGroup(Alignment.LEADING)
@@ -242,18 +286,21 @@ public class EditPaciente extends JInternalFrame {
 						.addComponent(lblSexo))
 					.addGap(18)
 					.addGroup(gl_zonaDados.createParallelGroup(Alignment.LEADING)
-						.addComponent(txtNome, GroupLayout.PREFERRED_SIZE, 409, GroupLayout.PREFERRED_SIZE)
-						.addGroup(gl_zonaDados.createParallelGroup(Alignment.TRAILING, false)
-							.addComponent(ftxCep, Alignment.LEADING)
-							.addComponent(cbFormaPag, Alignment.LEADING, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-							.addComponent(ftxDataNascimento, Alignment.LEADING)
-							.addComponent(ftxTelefone, Alignment.LEADING)
-							.addComponent(cbSexo, Alignment.LEADING, 0, 137, Short.MAX_VALUE))
-						.addComponent(cbEstado, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)
-						.addComponent(txtCidade, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)
 						.addComponent(txtBairro, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)
 						.addComponent(txtRua, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)
-						.addComponent(txtNumero, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(txtNumero, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(cbEstado, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)
+						.addComponent(txtCidade, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)
+						.addGroup(gl_zonaDados.createSequentialGroup()
+							.addGroup(gl_zonaDados.createParallelGroup(Alignment.TRAILING, false)
+								.addComponent(ftxCep, Alignment.LEADING)
+								.addComponent(cbFormaPag, Alignment.LEADING, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(ftxDataNascimento, Alignment.LEADING)
+								.addComponent(ftxTelefone, Alignment.LEADING)
+								.addComponent(cbSexo, Alignment.LEADING, 0, 137, Short.MAX_VALUE))
+							.addGap(18)
+							.addComponent(lblCarregando))
+						.addComponent(txtNome, GroupLayout.PREFERRED_SIZE, 409, GroupLayout.PREFERRED_SIZE))
 					.addGap(263))
 		);
 		gl_zonaDados.setVerticalGroup(
@@ -280,9 +327,11 @@ public class EditPaciente extends JInternalFrame {
 						.addComponent(lblFormaPagamento)
 						.addComponent(cbFormaPag, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 					.addGap(18)
-					.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblCep)
-						.addComponent(ftxCep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addGroup(gl_zonaDados.createParallelGroup(Alignment.TRAILING)
+						.addComponent(lblCarregando, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
+							.addComponent(lblCep)
+							.addComponent(ftxCep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
 					.addGap(18)
 					.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblEstado)
@@ -303,9 +352,88 @@ public class EditPaciente extends JInternalFrame {
 					.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblNumeroRua)
 						.addComponent(txtNumero, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addContainerGap(253, Short.MAX_VALUE))
+					.addGap(253))
 		);
 		zonaDados.setLayout(gl_zonaDados);
+		
+		this.grupoHabilitavel = new ArrayList<JComponent>();
 
+		this.grupoHabilitavel.add(lblNome);
+		this.grupoHabilitavel.add(txtNome);
+		
+		this.grupoHabilitavel.add(lblSexo);
+		this.grupoHabilitavel.add(cbSexo);
+		
+		this.grupoHabilitavel.add(lblFotoPaciente);
+		this.grupoHabilitavel.add(btnAlterarFoto);
+		
+		this.grupoHabilitavel.add(lblTelefone);
+		this.grupoHabilitavel.add(ftxTelefone);
+		
+		this.grupoHabilitavel.add(lblDataNascimento);
+		this.grupoHabilitavel.add(ftxDataNascimento);
+		
+		this.grupoHabilitavel.add(lblFormaPagamento);
+		this.grupoHabilitavel.add(cbFormaPag);
+		
+		this.grupoHabilitavel.add(lblCep);
+		this.grupoHabilitavel.add(ftxCep);
+		
+		this.grupoHabilitavel.add(lblEstado);
+		this.grupoHabilitavel.add(cbEstado);
+		
+		this.grupoHabilitavel.add(lblCidade);
+		this.grupoHabilitavel.add(txtCidade);
+		
+		this.grupoHabilitavel.add(lblBairro);
+		this.grupoHabilitavel.add(txtBairro);
+		
+		this.grupoHabilitavel.add(lblRua);
+		this.grupoHabilitavel.add(txtRua);
+		
+		this.grupoHabilitavel.add(lblNumeroRua);
+		this.grupoHabilitavel.add(txtNumero);
+		
+		this.grupoHabilitavel.add(btnAplicar);
+		
+		this.grupoCEP = new ArrayList<JComponent>();
+		
+		this.grupoCEP.add(lblEstado);
+		this.grupoCEP.add(cbEstado);
+		
+		this.grupoCEP.add(lblCidade);
+		this.grupoCEP.add(txtCidade);
+		
+		this.grupoCEP.add(lblBairro);
+		this.grupoCEP.add(txtBairro);
+		
+		this.grupoCEP.add(lblRua);
+		this.grupoCEP.add(txtRua);
+		
+		this.grupoCEP.add(lblNumeroRua);
+		this.grupoCEP.add(txtNumero);
 	}
-}
+	
+	private void populaCbSexo() {
+
+		this.cbSexo.addItem("Não Informar");
+		this.cbSexo.addItem("Masculino");
+		this.cbSexo.addItem("Feminino");
+	}
+	
+	private void populaCbFormasPag() {
+		
+		try {
+			List<FormaPagamento> listaFpag = new FormaPagamentoService().buscarTudo();
+			
+			for(FormaPagamento fpag : listaFpag) {
+				this.cbFormaPag.addItem(fpag);
+			}
+			this.cbFormaPag.setSelectedIndex(-1);
+			
+		} catch (SQLException | IOException | ObjetoNaoExisteException e) {
+			
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro ao buscar dados de Formas de Pagamento", JOptionPane.ERROR_MESSAGE); 
+		}
+	}
+}	

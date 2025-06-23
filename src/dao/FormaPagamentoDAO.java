@@ -145,7 +145,7 @@ public class FormaPagamentoDAO {
 		}
 	}
 	
-	public List<FormaPagamento> getAll() throws SQLException, ObjetoNaoExisteException{
+	public List<FormaPagamento> getAll() throws SQLException {
 		
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -173,10 +173,6 @@ public class FormaPagamentoDAO {
 				fpag.setDescricao(rs.getString("descricao"));
 				
 				listaFormas.add(fpag);
-			}
-			
-			if(listaFormas.size()==0) {
-				throw new ObjetoNaoExisteException(fpag);
 			}
 			
 			return listaFormas;

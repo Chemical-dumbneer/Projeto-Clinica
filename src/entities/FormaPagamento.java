@@ -24,4 +24,9 @@ public class FormaPagamento {
 	public String getDescricao() {
 		return this.descricao;
 	}
+	
+	@Override
+	public String toString() {
+		return this.descricao;
+	}
 }
