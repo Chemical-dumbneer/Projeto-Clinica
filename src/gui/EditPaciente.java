@@ -13,6 +13,7 @@ import java.awt.Component;
 import javax.swing.Box;
 import java.awt.BorderLayout;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import entities.FormaPagamento;
 import entities.Paciente;
@@ -21,6 +22,7 @@ import service.BuscaCEP;
 import service.FormaPagamentoService;
 
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.Image;
 
 import javax.swing.JButton;
@@ -40,7 +42,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.border.BevelBorder;
 
 import customExceptions.ObjetoNaoExisteException;
-import javax.swing.Icon;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 public class EditPaciente extends JInternalFrame {
@@ -61,6 +62,12 @@ public class EditPaciente extends JInternalFrame {
 	private JFormattedTextField ftxCep;
 	private JComboBox<String> cbEstado;
 	private JButton btnAplicar;
+	
+	private static final String[] UFs = {
+		    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO",
+		    "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI",
+		    "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+		};
 	
 	private JLabel lblFotoPaciente;
 	private JLabel lblCarregando; 
@@ -99,6 +106,13 @@ public class EditPaciente extends JInternalFrame {
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro ao buscar info CEP", JOptionPane.ERROR_MESSAGE);
 		}
+	}
+	
+	public void popularComboBoxUF() {
+	    this.cbEstado.removeAllItems(); // limpa antes
+	    for (String uf : UFs) {
+	        this.cbEstado.addItem(uf);
+	    }
 	}
 	
 	private void populaDadosPaciente(Paciente paciente) {
@@ -167,6 +181,8 @@ public class EditPaciente extends JInternalFrame {
 		
 		JLabel lblIdPaciente = new JLabel("Código do Paciente:");
 		panel_1.add(lblIdPaciente);
+		txtIdPaciente.setPreferredSize(new Dimension(200, 20));
+		txtIdPaciente.setMinimumSize(new Dimension(200, 20));
 		txtIdPaciente.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				buscaPaciente();
@@ -179,6 +195,20 @@ public class EditPaciente extends JInternalFrame {
 		txtIdPaciente.setSize(new Dimension(100, 20));
 		txtIdPaciente.setMaximumSize(new Dimension(200, 30));
 		txtIdPaciente.setColumns(10);
+		
+		JButton btnProcuraPaciente = new JButton("Procurar");
+		panel_1.add(btnProcuraPaciente);
+		btnProcuraPaciente.addActionListener(e -> {
+		    SeletorPacienteDialog seletor = new SeletorPacienteDialog(
+		        (Frame) SwingUtilities.getWindowAncestor(btnProcuraPaciente),
+		        new PacienteService()
+		    );
+
+		    seletor.setVisible(true);
+
+		    Paciente selecionado = seletor.getPacienteSelecionado();
+		    populaDadosPaciente(selecionado);
+		});
 		
 		JSeparator separator = new JSeparator();
 		getContentPane().add(separator);
@@ -257,7 +287,7 @@ public class EditPaciente extends JInternalFrame {
 		
 		JLabel lblEstado = new JLabel("Estado:");
 		
-		cbEstado = new JComboBox<Object>();
+		cbEstado = new JComboBox<String>();
 		
 		JLabel lblCidade = new JLabel("Cidade:");
 		

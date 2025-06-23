@@ -56,6 +56,21 @@ public class PacienteService {
 		return pacientes;
 	}
 	
+	public List<Paciente> buscarPorNome(String trechoNome) throws SQLException, IOException, ObjetoNaoExisteException {
+		
+		Connection conn = BancoDados.conectar();
+		List<Paciente> pacientes = new ArrayList<Paciente>();
+		
+		pacientes = new PacienteDAO(conn).getByName(trechoNome);
+		
+		for(Paciente pc : pacientes) {
+			FormaPagamento fpag = new FormaPagamentoService().buscarPorID(pc.getFormaPag().getID());
+			pc.setFormaPag(fpag);
+		}
+		
+		return pacientes;
+	}
+	
 	public int ProxID() throws SQLException, IOException {
 		
 		Connection conn = BancoDados.conectar();

@@ -279,4 +279,72 @@ public class PacienteDAO {
 			BancoDados.desconectar();
 		}	
 	}
+	
+	public List<Paciente> getByName(String trechoNome) throws SQLException, ObjetoNaoExisteException {
+		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		List<Paciente> listaPacientes = new ArrayList<Paciente>();
+		Paciente paciente = null;
+		
+		try {
+			
+			st = this.conn.prepareStatement(
+					"""
+						SELECT 
+							id_paciente,
+							nome,
+							sexo,
+							foto,
+							telefone,
+							data_nascimento,
+							id_forma_pag,
+							estado,
+							cidade,
+							bairro,
+							rua,
+							numero,
+							cep
+						FROM 
+							pacientes
+						WHERE
+							nome ILIKE '%?%';
+					"""
+					);
+			st.setString(0, trechoNome);
+			
+			rs = st.executeQuery();
+			
+			while(rs.next()) {
+				paciente = new Paciente();
+				
+				paciente.setId(rs.getInt("id_paciente"));
+				paciente.setNome(rs.getString("nome"));
+				paciente.setSexo(rs.getString("sexo").charAt(0));
+				paciente.setFoto(Paths.get(rs.getString("foto")));
+				paciente.setTelefone(rs.getString("telefone"));
+				paciente.setDataNascimento(rs.getDate("data_nascimento"));
+				paciente.getFormaPag().setID(rs.getInt("id_forma_pag"));
+				paciente.setEstado(rs.getString("estado"));
+				paciente.setCidade(rs.getString("cidade"));
+				paciente.setBairro(rs.getString("bairro"));
+				paciente.setRua(rs.getString("rua"));
+				paciente.setNumero(rs.getInt("numero"));
+				paciente.setCep(rs.getString("cep"));
+				
+				listaPacientes.add(paciente);
+			}
+			
+			if(listaPacientes.size()==0) {
+				throw new ObjetoNaoExisteException(paciente);
+			}
+			
+			return listaPacientes;
+			
+		} finally {
+			BancoDados.finalizarStatement(st);
+			BancoDados.finalizarResultSet(rs);
+			BancoDados.desconectar();
+		}	
+	}
 }
