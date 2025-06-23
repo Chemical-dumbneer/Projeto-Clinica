@@ -1,5 +1,7 @@
 package entities;
 
+import service.ConfiguracoesSistema;
+
 import java.nio.file.Path;
 import java.sql.Date;
 
@@ -8,7 +10,7 @@ public class Paciente {
 	private int id;
 	private String nome;
 	private char sexo;
-	private Path foto;
+	private String foto;
 	private String telefone;
 	private Date dataNascimento;
 	private FormaPagamento formaPag;
@@ -47,11 +49,11 @@ public class Paciente {
 		this.sexo = sexo;
 	}
 
-	public Path getFoto() {
-		return foto;
+	public String getFoto() {
+		return this.foto;
 	}
 
-	public void setFoto(Path foto) {
+	public void setFoto(String foto) {
 		this.foto = foto;
 	}
 

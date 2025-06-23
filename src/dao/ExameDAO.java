@@ -42,13 +42,13 @@ public class ExameDAO {
 						VALUES (?,?,?,?,?,?,?);
 					"""
 					);
-			st.setString(0, exame.getMedico().getCrm());
-			st.setInt(1, exame.getPaciente().getId());
-			st.setInt(2, exame.getTipoExame().getId());
-			st.setTimestamp(3, exame.getDataIni());
-			st.setTimestamp(4, exame.getDataFim());
-			st.setDouble(5, exame.getValor());
-			st.setInt(6, exame.getStatusConsulta().getIndice());
+			st.setString(1, exame.getMedico().getCrm());
+			st.setInt(2, exame.getPaciente().getId());
+			st.setInt(3, exame.getTipoExame().getId());
+			st.setTimestamp(4, exame.getDataIni());
+			st.setTimestamp(5, exame.getDataFim());
+			st.setDouble(6, exame.getValor());
+			st.setInt(7, exame.getStatusConsulta().getIndice());
 			
 			return st.executeUpdate();
 			
@@ -78,14 +78,14 @@ public class ExameDAO {
 							data_hora = ?;
 					"""
 					);
-			st.setTimestamp(0, exame.getDataFim());
-			st.setDouble(1, exame.getValor());
-			st.setInt(2, exame.getStatusConsulta().getIndice());
+			st.setTimestamp(1, exame.getDataFim());
+			st.setDouble(2, exame.getValor());
+			st.setInt(3, exame.getStatusConsulta().getIndice());
 			
-			st.setString(3, exame.getMedico().getCrm());
-			st.setInt(4, exame.getPaciente().getId());
-			st.setInt(5, exame.getTipoExame().getId());
-			st.setTimestamp(6, exame.getDataIni());
+			st.setString(4, exame.getMedico().getCrm());
+			st.setInt(5, exame.getPaciente().getId());
+			st.setInt(6, exame.getTipoExame().getId());
+			st.setTimestamp(7, exame.getDataIni());
 			
 			return st.executeUpdate();
 			
@@ -113,12 +113,12 @@ public class ExameDAO {
 							id_exame = ?;
 					"""
 					);
-			st.setTimestamp(0, novaDataHora);
+			st.setTimestamp(1, novaDataHora);
 			
-			st.setString(1, exame.getMedico().getCrm());
-			st.setInt(2, exame.getPaciente().getId());
-			st.setTimestamp(3, exame.getDataIni());
-			st.setInt(4, exame.getTipoExame().getId());
+			st.setString(2, exame.getMedico().getCrm());
+			st.setInt(3, exame.getPaciente().getId());
+			st.setTimestamp(4, exame.getDataIni());
+			st.setInt(5, exame.getTipoExame().getId());
 			
 			return st.executeUpdate();
 			
@@ -153,10 +153,10 @@ public class ExameDAO {
 						id_exame = ?;
 					"""
 					);
-			st.setString(0, medico.getCrm());
-			st.setInt(1, paciente.getId());
-			st.setTimestamp(2, dataHora);
-			st.setInt(3, tipoExame.getId());
+			st.setString(1, medico.getCrm());
+			st.setInt(2, paciente.getId());
+			st.setTimestamp(3, dataHora);
+			st.setInt(4, tipoExame.getId());
 			
 			rs = st.executeQuery();
 			if(rs.next()) {
@@ -203,9 +203,9 @@ public class ExameDAO {
 						data_hora BETWEEN ? AND ?;
 					"""
 					);
-			st.setString(0, medico.getCrm());
-			st.setTimestamp(1, inicioIntervalo);
-			st.setTimestamp(2, finalIntervalo);
+			st.setString(1, medico.getCrm());
+			st.setTimestamp(2, inicioIntervalo);
+			st.setTimestamp(3, finalIntervalo);
 			
 			rs = st.executeQuery();
 			while(rs.next()) {
@@ -255,9 +255,9 @@ public class ExameDAO {
 						data_hora BETWEEN ? AND ?;
 					"""
 					);
-			st.setInt(0, tipoExame.getId());
-			st.setTimestamp(1, inicioIntervalo);
-			st.setTimestamp(2, finalIntervalo);
+			st.setInt(1, tipoExame.getId());
+			st.setTimestamp(2, inicioIntervalo);
+			st.setTimestamp(3, finalIntervalo);
 			
 			rs = st.executeQuery();
 			while(rs.next()) {

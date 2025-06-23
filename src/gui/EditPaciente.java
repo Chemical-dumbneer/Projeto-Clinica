@@ -19,6 +19,7 @@ import entities.FormaPagamento;
 import entities.Paciente;
 import service.PacienteService;
 import service.BuscaCEP;
+import service.ConfiguracoesSistema;
 import service.FormaPagamentoService;
 
 import java.awt.FlowLayout;
@@ -28,8 +29,16 @@ import java.awt.Image;
 import javax.swing.JButton;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.ActionEvent;
@@ -38,8 +47,11 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.border.BevelBorder;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.MaskFormatter;
 
 import customExceptions.ObjetoNaoExisteException;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -47,6 +59,10 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 public class EditPaciente extends JInternalFrame {
 
 	private static final long serialVersionUID = 1L;
+	private Path novaFotoSelecionada;
+	private boolean modoAtualizacao = false;
+	private Paciente pacienteAtual = null;
+	
 	private EcraPrincipal janelaMae;
 	private final JTextField txtIdPaciente = new JTextField();
 	private JTextField txtNome;
@@ -62,6 +78,7 @@ public class EditPaciente extends JInternalFrame {
 	private JFormattedTextField ftxCep;
 	private JComboBox<String> cbEstado;
 	private JButton btnAplicar;
+	private JButton btnProcuraPaciente;
 	
 	private static final String[] UFs = {
 		    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO",
@@ -80,18 +97,6 @@ public class EditPaciente extends JInternalFrame {
 		this.janelaMae.mntmAddPaciente.setEnabled(true);
 	}
 	
-	private void buscaPaciente() {
-		Paciente paciente = null;
-		try {
-			paciente = new PacienteService().buscarPorID(Integer.valueOf(txtIdPaciente.getText()));
-		} catch (ObjetoNaoExisteException o) {
-			paciente = new Paciente();
-		} catch (NumberFormatException | SQLException | IOException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro ao buscar dados de pacientes", JOptionPane.ERROR_MESSAGE);
-		}
-		this.populaDadosPaciente(paciente);
-	}
-	
 	private void buscaCEP() {
 		BuscaCEP bcep = new BuscaCEP(
 					this.ftxCep.getText(),
@@ -101,23 +106,101 @@ public class EditPaciente extends JInternalFrame {
 					this.txtRua,
 					this.lblCarregando
 				);
-		try {
-			bcep.Run();
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro ao buscar info CEP", JOptionPane.ERROR_MESSAGE);
-		}
+		bcep.start();
+	}
+	
+	private void atualizarImagem(Path caminhoImagem) {
+	    ImageIcon icone = new ImageIcon(caminhoImagem.toString());
+	    Image img = icone.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+	    lblFotoPaciente.setIcon(new ImageIcon(img));
 	}
 	
 	public void popularComboBoxUF() {
-	    this.cbEstado.removeAllItems(); // limpa antes
+	    this.cbEstado.removeAllItems();
 	    for (String uf : UFs) {
 	        this.cbEstado.addItem(uf);
 	    }
 	}
 	
-	private void populaDadosPaciente(Paciente paciente) {
-		
+	private void habilitarCampos() {
+	    for (JComponent comp : grupoHabilitavel) {
+	        comp.setEnabled(true);
+	    }
 	}
+	
+	private void populaDadosPaciente(Paciente paciente) {
+	    if (paciente == null || paciente.getId() == 0) {
+	        return; // paciente inválido ou novo
+	    }
+
+	    txtIdPaciente.setText(String.valueOf(paciente.getId()));
+	    txtNome.setText(paciente.getNome());
+	    
+	    char sexo = paciente.getSexo();
+	    switch (sexo) {
+	        case 'M' -> cbSexo.setSelectedItem("Masculino");
+	        case 'F' -> cbSexo.setSelectedItem("Feminino");
+	        default -> cbSexo.setSelectedItem("Não Informar");
+	    }
+
+	    ftxTelefone.setText(paciente.getTelefone());
+
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	    LocalDate data = paciente.getDataNascimento().toLocalDate();
+	    ftxDataNascimento.setText(data.format(formatter));
+
+	    cbFormaPag.setSelectedItem(paciente.getFormaPag());
+
+	    ftxCep.setText(paciente.getCep());
+	    cbEstado.setSelectedItem(paciente.getEstado());
+	    txtCidade.setText(paciente.getCidade());
+	    txtBairro.setText(paciente.getBairro());
+	    txtRua.setText(paciente.getRua());
+	    txtNumero.setText(String.valueOf(paciente.getNumero()));
+
+	    if (paciente.getFoto() != null && Path.of(ConfiguracoesSistema.getCaminhoImagens(),paciente.getFoto()).toFile().exists()) {
+	        ImageIcon icone = new ImageIcon(Path.of(ConfiguracoesSistema.getCaminhoImagens(),paciente.getFoto()).toString());
+	        Image img = icone.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+	        lblFotoPaciente.setIcon(new ImageIcon(img));
+	    }
+
+	    pacienteAtual = paciente;
+	    habilitarCampos();
+	}
+	
+	private Paciente getPacienteFromForm() throws IOException {
+	    Paciente paciente = (pacienteAtual != null) ? pacienteAtual : new Paciente();
+	    
+	    paciente.setNome(txtNome.getText());
+	    paciente.setSexo(cbSexo.getSelectedIndex() == 1 ? 'M' : cbSexo.getSelectedIndex() == 2 ? 'F' : 'N');
+	    paciente.setTelefone(ftxTelefone.getText());
+	    
+	    String textoData = ftxDataNascimento.getText();
+		// precisa transformar para java.sql.Date:
+		LocalDate localDate = LocalDate.parse(textoData, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		Date sqlDate = Date.valueOf(localDate);
+		paciente.setDataNascimento(sqlDate);
+
+	    paciente.setFormaPag((FormaPagamento) cbFormaPag.getSelectedItem());
+	    paciente.setCep(ftxCep.getText());
+	    paciente.setEstado((String) cbEstado.getSelectedItem());
+	    paciente.setCidade(txtCidade.getText());
+	    paciente.setBairro(txtBairro.getText());
+	    paciente.setRua(txtRua.getText());
+	    paciente.setNumero(Integer.parseInt(txtNumero.getText()));
+
+	    // FOTO: se for nova, salva e define o caminho
+	    if (novaFotoSelecionada != null) {
+	        String nomeArquivo = paciente.getId() + ".png";
+	        Path destino = Path.of(ConfiguracoesSistema.getCaminhoImagens(),nomeArquivo);
+	        Files.copy(novaFotoSelecionada, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+	        paciente.setFoto(nomeArquivo);
+	    }
+
+	    return paciente;
+	}
+
+
 	/**
 	 * Create the frame.
 	 */
@@ -126,6 +209,7 @@ public class EditPaciente extends JInternalFrame {
 		this.initComponentes();
 		this.populaCbSexo();
 		this.populaCbFormasPag();
+		this.popularComboBoxUF();
 		
 		for(JComponent comp : this.grupoHabilitavel) {
 			comp.setEnabled(false);
@@ -157,6 +241,11 @@ public class EditPaciente extends JInternalFrame {
 		btnAplicar.setPreferredSize(new Dimension(150, 23));
 		btnAplicar.setMaximumSize(new Dimension(150, 23));
 		btnAplicar.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		btnAplicar.addActionListener(e -> {
+			salvaAlteracoes();
+		});
+
+		
 		panel_2.add(btnAplicar);
 		
 		JButton btnCancelar = new JButton("Cancelar");
@@ -183,31 +272,21 @@ public class EditPaciente extends JInternalFrame {
 		panel_1.add(lblIdPaciente);
 		txtIdPaciente.setPreferredSize(new Dimension(200, 20));
 		txtIdPaciente.setMinimumSize(new Dimension(200, 20));
-		txtIdPaciente.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				buscaPaciente();
-				txtIdPaciente.setEnabled(false);
-				btnAplicar.setEnabled(true);
-			}
+		txtIdPaciente.addActionListener(e -> {
+			procuraPacienteOuCria();
 		});
+
+
 		panel_1.add(txtIdPaciente);
 		txtIdPaciente.setHorizontalAlignment(SwingConstants.CENTER);
 		txtIdPaciente.setSize(new Dimension(100, 20));
 		txtIdPaciente.setMaximumSize(new Dimension(200, 30));
 		txtIdPaciente.setColumns(10);
 		
-		JButton btnProcuraPaciente = new JButton("Procurar");
+		btnProcuraPaciente = new JButton("Procurar");
 		panel_1.add(btnProcuraPaciente);
 		btnProcuraPaciente.addActionListener(e -> {
-		    SeletorPacienteDialog seletor = new SeletorPacienteDialog(
-		        (Frame) SwingUtilities.getWindowAncestor(btnProcuraPaciente),
-		        new PacienteService()
-		    );
-
-		    seletor.setVisible(true);
-
-		    Paciente selecionado = seletor.getPacienteSelecionado();
-		    populaDadosPaciente(selecionado);
+		    abrirSeletorPaciente();
 		});
 		
 		JSeparator separator = new JSeparator();
@@ -250,6 +329,11 @@ public class EditPaciente extends JInternalFrame {
 		
 		btnAlterarFoto = new JButton("Mudar Foto");
 		btnAlterarFoto.setAlignmentX(Component.CENTER_ALIGNMENT);
+		btnAlterarFoto.addActionListener(e -> {
+		    alterarFoto();
+		});
+
+		
 		panel_3.add(btnAlterarFoto);
 		
 		JPanel zonaDados = new JPanel();
@@ -266,11 +350,27 @@ public class EditPaciente extends JInternalFrame {
 		
 		JLabel lblTelefone = new JLabel("Telefone:");
 		
-		ftxTelefone = new JFormattedTextField();
+		MaskFormatter maskTelefone;
+		try {
+			maskTelefone = new MaskFormatter("(##) #####-####");maskTelefone.setPlaceholderCharacter('_');
+			ftxTelefone = new JFormattedTextField();
+			ftxTelefone.setFormatterFactory(new DefaultFormatterFactory(maskTelefone));
+		} catch (ParseException e1) {
+			JOptionPane.showMessageDialog(ftxCep, e1.getMessage(), "Erro: Se vira amigão", JOptionPane.ERROR_MESSAGE);
+		}
+		
 		
 		JLabel lblDataNascimento = new JLabel("Data de Nascimento:");
 		
-		ftxDataNascimento = new JFormattedTextField();
+		MaskFormatter maskData;
+		try {
+			maskData = new MaskFormatter("##/##/####");
+			maskData.setPlaceholderCharacter('_');
+			ftxDataNascimento = new JFormattedTextField();
+			ftxDataNascimento.setFormatterFactory(new DefaultFormatterFactory(maskData));
+		} catch (ParseException e2) {
+			JOptionPane.showMessageDialog(ftxCep, e2.getMessage(), "Erro: Se vira amigão", JOptionPane.ERROR_MESSAGE);
+		}
 		
 		JLabel lblFormaPagamento = new JLabel("Forma de Pagamento:");
 		
@@ -278,7 +378,13 @@ public class EditPaciente extends JInternalFrame {
 		
 		JLabel lblCep = new JLabel("CEP:");
 		
-		ftxCep = new JFormattedTextField();
+		try {
+		    MaskFormatter cepMask = new MaskFormatter("#####-###");
+		    cepMask.setPlaceholderCharacter('_');
+		    ftxCep = new JFormattedTextField(cepMask);
+		} catch (ParseException e) {
+		    JOptionPane.showMessageDialog(ftxCep, e.getMessage(), "Erro: Se vira amigão", JOptionPane.ERROR_MESSAGE);
+		}
 		ftxCep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				buscaCEP();
@@ -469,6 +575,84 @@ public class EditPaciente extends JInternalFrame {
 		this.grupoCEP.add(txtNumero);
 	}
 	
+	private void salvaAlteracoes() {
+	    try {
+	        Paciente paciente = getPacienteFromForm();
+	        PacienteService service = new PacienteService();
+
+	        if (modoAtualizacao) {
+	            service.atualizar(paciente);
+	            JOptionPane.showMessageDialog(this, "Paciente atualizado com sucesso.");
+	        } else {
+	            service.cadastrar(paciente);
+	            JOptionPane.showMessageDialog(this, "Paciente cadastrado com sucesso.");
+	        }
+
+	        //fecharJanela();
+
+	    } catch (Exception ex) {
+	        JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+
+	private void procuraPacienteOuCria() {
+	    try {
+	        String input = txtIdPaciente.getText().trim();
+	        if (input.isEmpty()) {
+	            throw new ObjetoNaoExisteException(null);
+	        }
+
+	        int id = Integer.parseInt(input);
+	        pacienteAtual = new PacienteService().buscarPorID(id);
+	        modoAtualizacao = true;
+	        populaDadosPaciente(pacienteAtual);
+	    } catch (ObjetoNaoExisteException ex) {
+	        try {
+	            int prox = new PacienteService().proxID();
+	            txtIdPaciente.setText(String.valueOf(prox));
+	            pacienteAtual = new Paciente();
+	            pacienteAtual.setId(prox);
+	            modoAtualizacao = false;
+	        } catch (SQLException | IOException err) {
+	            JOptionPane.showMessageDialog(this, "Erro ao obter próximo ID: " + err.getMessage());
+	        }
+	    } catch (Exception ex) {
+	        JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage(), "ID inválido.", JOptionPane.ERROR_MESSAGE);
+	    }
+	    
+	    for (JComponent c : grupoHabilitavel) c.setEnabled(true);
+	    txtIdPaciente.setEnabled(false);
+	}
+
+	private void abrirSeletorPaciente() {
+		SeletorPacienteDialog seletor = new SeletorPacienteDialog(
+	        (Frame) SwingUtilities.getWindowAncestor(btnProcuraPaciente),
+	        new PacienteService()
+	    );
+
+	    seletor.setVisible(true);
+
+	    Paciente selecionado = seletor.getPacienteSelecionado();
+	    populaDadosPaciente(selecionado);
+	}
+
+	private void alterarFoto() {
+		JFileChooser chooser = new JFileChooser();
+	    chooser.setDialogTitle("Escolher Foto do Paciente");
+	    chooser.setAcceptAllFileFilterUsed(false);
+	    chooser.addChoosableFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imagens (*.png, *.jpg, *.jpeg)", "png", "jpg", "jpeg"));
+
+	    int resultado = chooser.showOpenDialog(this);
+	    if (resultado == JFileChooser.APPROVE_OPTION) {
+	        File arquivoSelecionado = chooser.getSelectedFile();
+	        Path caminho = arquivoSelecionado.toPath();
+
+	        // Atualiza o atributo e o preview
+	        novaFotoSelecionada = caminho;
+	        atualizarImagem(caminho);
+	    }
+	}
+
 	private void populaCbSexo() {
 
 		this.cbSexo.addItem("Não Informar");

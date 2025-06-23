@@ -41,12 +41,12 @@ public class ConsultaDAO {
 						VALUES (?,?,?,?,?,?);
 					"""
 					);
-			st.setString(0, consulta.getMedico().getCrm());
-			st.setInt(1, consulta.getPaciente().getId());
-			st.setTimestamp(2, consulta.getDataIni());
-			st.setTimestamp(3, consulta.getDataFim());
-			st.setDouble(4, consulta.getValor());
-			st.setInt(5, consulta.getStatusConsulta().getIndice());
+			st.setString(1, consulta.getMedico().getCrm());
+			st.setInt(2, consulta.getPaciente().getId());
+			st.setTimestamp(3, consulta.getDataIni());
+			st.setTimestamp(4, consulta.getDataFim());
+			st.setDouble(5, consulta.getValor());
+			st.setInt(6, consulta.getStatusConsulta().getIndice());
 			
 			return st.executeUpdate();
 			
@@ -75,13 +75,13 @@ public class ConsultaDAO {
 							data_hora = ?;
 					"""
 					);
-			st.setTimestamp(0, consulta.getDataFim());
-			st.setDouble(1, consulta.getValor());
-			st.setInt(2, consulta.getStatusConsulta().getIndice());
+			st.setTimestamp(1, consulta.getDataFim());
+			st.setDouble(2, consulta.getValor());
+			st.setInt(3, consulta.getStatusConsulta().getIndice());
 			
-			st.setString(3, consulta.getMedico().getCrm());
-			st.setInt(4, consulta.getPaciente().getId());
-			st.setTimestamp(5, consulta.getDataIni());
+			st.setString(4, consulta.getMedico().getCrm());
+			st.setInt(5, consulta.getPaciente().getId());
+			st.setTimestamp(6, consulta.getDataIni());
 			
 			return st.executeUpdate();
 			
@@ -108,11 +108,11 @@ public class ConsultaDAO {
 							data_hora = ?;
 					"""
 					);
-			st.setTimestamp(0, novaDataHora);
+			st.setTimestamp(1, novaDataHora);
 			
-			st.setString(1, consulta.getMedico().getCrm());
-			st.setInt(2, consulta.getPaciente().getId());
-			st.setTimestamp(3, consulta.getDataIni());
+			st.setString(2, consulta.getMedico().getCrm());
+			st.setInt(3, consulta.getPaciente().getId());
+			st.setTimestamp(4, consulta.getDataIni());
 			
 			return st.executeUpdate();
 			
@@ -146,9 +146,9 @@ public class ConsultaDAO {
 						data_hora = ?;
 					"""
 					);
-			st.setString(0, medico.getCrm());
-			st.setInt(1, paciente.getId());
-			st.setTimestamp(2, dataHora);
+			st.setString(1, medico.getCrm());
+			st.setInt(2, paciente.getId());
+			st.setTimestamp(3, dataHora);
 			
 			rs = st.executeQuery();
 			if(rs.next()) {
@@ -193,10 +193,10 @@ public class ConsultaDAO {
 						crm = ? AND
 						data_hora BETWEEN ? AND ?;
 					"""
-					);;
-			st.setString(0, medico.getCrm());
-			st.setTimestamp(1, inicioIntervalo);
-			st.setTimestamp(2, finalIntervalo);
+					);
+			st.setString(1, medico.getCrm());
+			st.setTimestamp(2, inicioIntervalo);
+			st.setTimestamp(3, finalIntervalo);
 			
 			rs = st.executeQuery();
 			while(rs.next()) {

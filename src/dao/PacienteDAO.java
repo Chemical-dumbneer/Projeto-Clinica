@@ -1,7 +1,6 @@
 package dao;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,23 +43,23 @@ public class PacienteDAO {
 								numero,
 								cep
 							)
-						VALUES (?,?,?,?,?,?,?,?,?,?,?,?);
+						VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);
 					"""
 					);
 			
-			st.setInt(0, paciente.getId());
-			st.setString(1, paciente.getNome());
-			st.setString(2, String.valueOf(paciente.getSexo()));
-			st.setString(3, paciente.getFoto().toString().replace(File.separatorChar, '/'));
-			st.setString(4, paciente.getTelefone());
-			st.setDate(5, paciente.getDataNascimento());
-			st.setInt(6, paciente.getFormaPag().getID());
-			st.setString(7, paciente.getEstado());
-			st.setString(8, paciente.getCidade());
-			st.setString(9, paciente.getBairro());
-			st.setString(10, paciente.getRua());
-			st.setInt(11, paciente.getNumero());
-			st.setString(12, paciente.getCep());
+			st.setInt(1, paciente.getId());
+			st.setString(2, paciente.getNome());
+			st.setString(3, String.valueOf(paciente.getSexo()));
+			st.setString(4, paciente.getFoto().toString().replace(File.separatorChar, '/'));
+			st.setString(5, paciente.getTelefone());
+			st.setDate(6, paciente.getDataNascimento());
+			st.setInt(7, paciente.getFormaPag().getID());
+			st.setString(8, paciente.getEstado());
+			st.setString(9, paciente.getCidade());
+			st.setString(10, paciente.getBairro());
+			st.setString(11, paciente.getRua());
+			st.setInt(12, paciente.getNumero());
+			st.setString(13, paciente.getCep());
 			
 			return st.executeUpdate();
 			
@@ -128,20 +127,20 @@ public class PacienteDAO {
 					"""
 					);
 			
-			st.setString(0, paciente.getNome());
-			st.setString(1, String.valueOf(paciente.getSexo()));
-			st.setString(2, paciente.getFoto().toString().replace(File.separatorChar, '/'));
-			st.setString(3, paciente.getTelefone());
-			st.setDate(4, paciente.getDataNascimento());
-			st.setInt(5, paciente.getFormaPag().getID());
-			st.setString(6, paciente.getEstado());
-			st.setString(7, paciente.getCidade());
-			st.setString(8, paciente.getBairro());
-			st.setString(9, paciente.getRua());
-			st.setInt(10, paciente.getNumero());
-			st.setString(11, paciente.getCep());
+			st.setString(1, paciente.getNome());
+			st.setString(2, String.valueOf(paciente.getSexo()));
+			st.setString(3, paciente.getFoto().toString().replace(File.separatorChar, '/'));
+			st.setString(4, paciente.getTelefone());
+			st.setDate(5, paciente.getDataNascimento());
+			st.setInt(6, paciente.getFormaPag().getID());
+			st.setString(7, paciente.getEstado());
+			st.setString(8, paciente.getCidade());
+			st.setString(9, paciente.getBairro());
+			st.setString(10, paciente.getRua());
+			st.setInt(11, paciente.getNumero());
+			st.setString(12, paciente.getCep());
 			
-			st.setInt(12, paciente.getId());
+			st.setInt(13, paciente.getId());
 			
 			return st.executeUpdate();
 			
@@ -181,7 +180,7 @@ public class PacienteDAO {
 					"""
 					);
 			
-			st.setInt(0, id);
+			st.setInt(1, id);
 			
 			rs = st.executeQuery();
 			
@@ -192,7 +191,7 @@ public class PacienteDAO {
 				
 				paciente.setNome(rs.getString("nome"));
 				paciente.setSexo(rs.getString("sexo").charAt(0));
-				paciente.setFoto(Paths.get(rs.getString("foto")));
+				paciente.setFoto(rs.getString("foto"));
 				paciente.setTelefone(rs.getString("telefone"));
 				paciente.setDataNascimento(rs.getDate("data_nascimento"));
 				paciente.getFormaPag().setID(rs.getInt("id_forma_pag"));
@@ -253,7 +252,7 @@ public class PacienteDAO {
 				paciente.setId(rs.getInt("id_paciente"));
 				paciente.setNome(rs.getString("nome"));
 				paciente.setSexo(rs.getString("sexo").charAt(0));
-				paciente.setFoto(Paths.get(rs.getString("foto")));
+				paciente.setFoto(rs.getString("foto"));
 				paciente.setTelefone(rs.getString("telefone"));
 				paciente.setDataNascimento(rs.getDate("data_nascimento"));
 				paciente.getFormaPag().setID(rs.getInt("id_forma_pag"));
@@ -277,7 +276,7 @@ public class PacienteDAO {
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
 			BancoDados.desconectar();
-		}	
+		} 	
 	}
 	
 	public List<Paciente> getByName(String trechoNome) throws SQLException, ObjetoNaoExisteException {
@@ -308,10 +307,10 @@ public class PacienteDAO {
 						FROM 
 							pacientes
 						WHERE
-							nome ILIKE '%?%';
+							nome ILIKE ?;
 					"""
 					);
-			st.setString(0, trechoNome);
+			st.setString(1, "%" + trechoNome + "%");
 			
 			rs = st.executeQuery();
 			
@@ -321,7 +320,7 @@ public class PacienteDAO {
 				paciente.setId(rs.getInt("id_paciente"));
 				paciente.setNome(rs.getString("nome"));
 				paciente.setSexo(rs.getString("sexo").charAt(0));
-				paciente.setFoto(Paths.get(rs.getString("foto")));
+				paciente.setFoto(rs.getString("foto"));
 				paciente.setTelefone(rs.getString("telefone"));
 				paciente.setDataNascimento(rs.getDate("data_nascimento"));
 				paciente.getFormaPag().setID(rs.getInt("id_forma_pag"));
@@ -345,6 +344,6 @@ public class PacienteDAO {
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
 			BancoDados.desconectar();
-		}	
+		} 	
 	}
 }

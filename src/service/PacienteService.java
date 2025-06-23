@@ -71,7 +71,7 @@ public class PacienteService {
 		return pacientes;
 	}
 	
-	public int ProxID() throws SQLException, IOException {
+	public int proxID() throws SQLException, IOException {
 		
 		Connection conn = BancoDados.conectar();
 		return new PacienteDAO(conn).getNextID();

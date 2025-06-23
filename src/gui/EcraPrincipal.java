@@ -107,6 +107,13 @@ public class EcraPrincipal {
 	public void abrirEditMedico() {
 		EditMedico editMedico = new EditMedico(this);
 		this.mntmMedicos.setEnabled(false);
+		editMedico.setVisible(true);
+		try {
+			editMedico.setMaximum(true);
+		} catch (PropertyVetoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.janelaPrincipal.add(editMedico);
 	}
 
@@ -253,6 +260,11 @@ public class EcraPrincipal {
 		mnMenuCadastros.add(mnSubMenuMedicos);
 		
 		mntmMedicos = new JMenuItem("Adicionar/Editar");
+		mntmMedicos.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				abrirEditMedico();
+			}
+		});
 		mnSubMenuMedicos.add(mntmMedicos);
 		
 		mntmEspecialidade = new JMenuItem("Especialidades");

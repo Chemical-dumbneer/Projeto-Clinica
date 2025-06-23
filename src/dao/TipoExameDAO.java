@@ -38,11 +38,11 @@ public class TipoExameDAO {
 					"""
 					);
 			
-			st.setInt(0, tipoExame.getId());
-			st.setString(1, tipoExame.getNome());
-			st.setTime(2, tipoExame.getDuracao());
-			st.setString(3, tipoExame.getOrientacoes());
-			st.setDouble(4, tipoExame.getValor());
+			st.setInt(1, tipoExame.getId());
+			st.setString(2, tipoExame.getNome());
+			st.setTime(3, tipoExame.getDuracao());
+			st.setString(4, tipoExame.getOrientacoes());
+			st.setDouble(5, tipoExame.getValor());
 			
 			return st.executeUpdate();
 			
@@ -72,12 +72,11 @@ public class TipoExameDAO {
 					"""
 					);
 			
-			st.setString(0, tipoExame.getNome());
-			st.setTime(1, tipoExame.getDuracao());
-			st.setString(2, tipoExame.getOrientacoes());
-			st.setDouble(3, tipoExame.getValor());
-
-			st.setInt(4, tipoExame.getId());
+			st.setString(1, tipoExame.getNome());
+			st.setTime(2, tipoExame.getDuracao());
+			st.setString(3, tipoExame.getOrientacoes());
+			st.setDouble(4, tipoExame.getValor());
+			st.setInt(5, tipoExame.getId());
 			
 			return st.executeUpdate();
 			
@@ -139,7 +138,7 @@ public class TipoExameDAO {
 					"""
 					);
 			
-			st.setInt(0, id);
+			st.setInt(1, id);
 			
 			rs = st.executeQuery();
 			
@@ -210,6 +209,6 @@ public class TipoExameDAO {
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
 			BancoDados.desconectar();
-		}	
+		} 	
 	}
 }

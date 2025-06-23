@@ -8,6 +8,7 @@ import java.net.URL;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import org.json.JSONObject;
@@ -36,22 +37,30 @@ public class BuscaCEP extends Thread {
 		this.gif = gif;
 	}
 	
-	public void Run() throws IOException {
+	public void run() {
 		this.gif.setVisible(true);
-		String json = buscarCEP(this.cep);
-		JSONObject obj = new JSONObject(json);
-		this.txtRua.setText(obj.getString("logradouro"));
-		this.txtRua.setEnabled(false);
-		
-		this.txtBairro.setText(obj.getString("bairro"));
-		this.txtBairro.setEnabled(false);
-		
-		this.txtCidade.setText(obj.getString("localidade"));
-		this.txtCidade.setEnabled(false);
-		
-		this.cbEstado.setSelectedItem(obj.getString("uf"));
-		this.cbEstado.setEnabled(false);
-		this.gif.setVisible(false);
+		String json;
+		try {
+			System.out.println("Buscando dados do CEP: " + this.cep);
+			json = buscarCEP(this.cep);
+			System.out.println("Resposta: " + json);
+			JSONObject obj = new JSONObject(json);
+			this.txtRua.setText(obj.getString("logradouro"));
+			this.txtRua.setEnabled(false);
+			
+			this.txtBairro.setText(obj.getString("bairro"));
+			this.txtBairro.setEnabled(false);
+			
+			this.txtCidade.setText(obj.getString("localidade"));
+			this.txtCidade.setEnabled(false);
+			
+			this.cbEstado.setSelectedItem(obj.getString("uf"));
+			this.cbEstado.setEnabled(false);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro ao buscar o CEP", JOptionPane.ERROR_MESSAGE);
+		} finally {
+			this.gif.setVisible(false);
+		}
 	}
 	
 	@SuppressWarnings("deprecation")

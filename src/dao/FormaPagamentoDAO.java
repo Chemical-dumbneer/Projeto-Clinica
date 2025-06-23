@@ -35,8 +35,8 @@ public class FormaPagamentoDAO {
 					"""
 					);
 			
-			st.setInt(0, fpag.getID());
-			st.setString(1, fpag.getDescricao());
+			st.setInt(1, fpag.getID());
+			st.setString(2, fpag.getDescricao());
 			
 			return st.executeUpdate();
 			
@@ -63,8 +63,8 @@ public class FormaPagamentoDAO {
 					"""
 					);
 			
-			st.setString(0, fpag.getDescricao());
-			st.setInt(1, fpag.getID());
+			st.setString(1, fpag.getDescricao());
+			st.setInt(2, fpag.getID());
 			
 			return st.executeUpdate();
 			
@@ -123,7 +123,7 @@ public class FormaPagamentoDAO {
 					"""
 					);
 			
-			st.setInt(0, id);
+			st.setInt(1, id);
 			
 			rs = st.executeQuery();
 			
@@ -181,6 +181,6 @@ public class FormaPagamentoDAO {
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
 			BancoDados.desconectar();
-		}	
+		} 	
 	}
 }

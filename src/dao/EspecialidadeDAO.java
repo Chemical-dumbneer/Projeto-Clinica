@@ -35,8 +35,8 @@ public class EspecialidadeDAO {
 					"""
 					);
 			
-			st.setString(0, espec.getCbo());
-			st.setString(1, espec.getDescricao());
+			st.setString(1, espec.getCbo());
+			st.setString(2, espec.getDescricao());
 			
 			return st.executeUpdate();
 			
@@ -58,13 +58,13 @@ public class EspecialidadeDAO {
 							especialidades
 						SET
 							descricao = ?
-						WERE
+						WHERE
 							cbo = ?;
 					"""
 					);
 			
-			st.setString(0, espec.getDescricao());
-			st.setString(1, espec.getCbo());
+			st.setString(1, espec.getDescricao());
+			st.setString(2, espec.getCbo());
 			
 			return st.executeUpdate();
 			
@@ -93,7 +93,7 @@ public class EspecialidadeDAO {
 					"""
 					);
 			
-			st.setString(0, cbo);
+			st.setString(1, cbo);
 			
 			rs = st.executeQuery();
 			
@@ -155,6 +155,6 @@ public class EspecialidadeDAO {
 			BancoDados.finalizarStatement(st);
 			BancoDados.finalizarResultSet(rs);
 			BancoDados.desconectar();
-		}	
+		} 	
 	}
 }

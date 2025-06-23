@@ -39,22 +39,22 @@ public class MedicoDAO {
 								numero,
 								duracao_consulta,
 								cep
-							)
-						VALUES (?,?,?,?,?,?,?,?,?,?,?);
-					"""
+						)
+					VALUES (?,?,?,?,?,?,?,?,?,?,?);
+				"""
 					);
 			
-			st.setString(0, medico.getCrm());
-			st.setString(1, medico.getNome());
-			st.setString(2, medico.getEspecialidade().getCbo());
-			st.setString(3, medico.getTelefone());
-			st.setString(4, medico.getEstado());
-			st.setString(5, medico.getCidade());
-			st.setString(6, medico.getBairro());
-			st.setString(7, medico.getRua());
-			st.setInt(8, medico.getNumero());
-			st.setTime(9, medico.getDuracaoConsulta());
-			st.setString(10, medico.getCep());
+			st.setString(1, medico.getCrm());
+			st.setString(2, medico.getNome());
+			st.setString(3, medico.getEspecialidade().getCbo());
+			st.setString(4, medico.getTelefone());
+			st.setString(5, medico.getEstado());
+			st.setString(6, medico.getCidade());
+			st.setString(7, medico.getBairro());
+			st.setString(8, medico.getRua());
+			st.setInt(9, medico.getNumero());
+			st.setTime(10, medico.getDuracaoConsulta());
+			st.setString(11, medico.getCep());
 			
 			return st.executeUpdate();
 			
@@ -85,24 +85,23 @@ public class MedicoDAO {
 								numero = ?,
 								duracao_consulta = ?,
 								cep = ?
-							)
 						WHERE 
 							crm = ?;
-					"""
+				"""
 					);
 			
-			st.setString(0, medico.getNome());
-			st.setString(1, medico.getEspecialidade().getCbo());
-			st.setString(2, medico.getTelefone());
-			st.setString(3, medico.getEstado());
-			st.setString(4, medico.getCidade());
-			st.setString(5, medico.getBairro());
-			st.setString(6, medico.getRua());
-			st.setInt(7, medico.getNumero());
-			st.setTime(8, medico.getDuracaoConsulta());
-			st.setString(9, medico.getCep());
+			st.setString(1, medico.getNome());
+			st.setString(2, medico.getEspecialidade().getCbo());
+			st.setString(3, medico.getTelefone());
+			st.setString(4, medico.getEstado());
+			st.setString(5, medico.getCidade());
+			st.setString(6, medico.getBairro());
+			st.setString(7, medico.getRua());
+			st.setInt(8, medico.getNumero());
+			st.setTime(9, medico.getDuracaoConsulta());
+			st.setString(10, medico.getCep());
 			
-			st.setString(10, medico.getCrm());
+			st.setString(11, medico.getCrm());
 			
 			return st.executeUpdate();
 			
@@ -137,10 +136,10 @@ public class MedicoDAO {
 							medicos 
 						WHERE 
 							crm = ?;
-					"""
+				"""
 					);
 			
-			st.setString(0, crm);
+			st.setString(1, crm);
 			
 			rs = st.executeQuery();
 			
@@ -197,7 +196,7 @@ public class MedicoDAO {
 							cep 
 						FROM 
 							medicos;
-					"""
+				"""
 					);
 			
 			rs = st.executeQuery();
