@@ -5,27 +5,53 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+
 import org.json.JSONObject;
 
 /*
  * essa classe inteira é uma abominação, favor não dar muita importancia. 
- * Ela apenas busca os dados de localização a partir do CEP usando uma API dos correios
+ * Ela apenas busca os dados de localização a partir do CEP usando uma API dos correios, ah e faz isso assíncronamente. Não me pergunte pq.
  */
 
-public class BuscaCEP {
-	private String uf;
-	private String cidade;
-	private String bairro;
-	private String rua;
+public class BuscaCEP extends Thread {
+	private String cep;
 	
-	public BuscaCEP(String cep) throws IOException {
+	private JComboBox<String> cbEstado;
+	private JTextField txtCidade;
+	private JTextField txtBairro;
+	private JTextField txtRua;
+	private JLabel gif;
+	
+	public BuscaCEP(String cep, JComboBox<String> cbEstado, JTextField txtCidade, JTextField txtBairro, JTextField txtRua, JLabel gif) {
 		
-		String json = buscarCEP("01001000");
+		this.cep = cep;
+		this.cbEstado = cbEstado;
+		this.txtCidade = txtCidade;
+		this.txtBairro = txtBairro;
+		this.txtRua = txtRua;
+		this.gif = gif;
+	}
+	
+	public void Run() throws IOException {
+		this.gif.setVisible(true);
+		String json = buscarCEP(this.cep);
 		JSONObject obj = new JSONObject(json);
-		this.rua = obj.getString("logradouro");
-		this.bairro = obj.getString("bairro");
-		this.cidade = obj.getString("localidade");
-		this.uf = obj.getString("uf");
+		this.txtRua.setText(obj.getString("logradouro"));
+		this.txtRua.setEnabled(false);
+		
+		this.txtBairro.setText(obj.getString("bairro"));
+		this.txtBairro.setEnabled(false);
+		
+		this.txtCidade.setText(obj.getString("localidade"));
+		this.txtCidade.setEnabled(false);
+		
+		this.cbEstado.setSelectedItem(obj.getString("uf"));
+		this.cbEstado.setEnabled(false);
+		this.gif.setVisible(false);
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -42,22 +68,6 @@ public class BuscaCEP {
 	    }
 	    leitor.close();
 	    return resposta.toString();
-	}
-	
-	public String getEstado() {
-		return this.uf;
-	}
-	
-	public String getCidade() {
-		return this.cidade;
-	}
-	
-	public String getBairro() {
-		return this.bairro;
-	}
-	
-	public String getRua() {
-		return this.rua;
 	}
 }
 

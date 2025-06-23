@@ -17,6 +17,7 @@ import javax.swing.SwingConstants;
 import entities.FormaPagamento;
 import entities.Paciente;
 import service.PacienteService;
+import service.BuscaCEP;
 import service.FormaPagamentoService;
 
 import java.awt.FlowLayout;
@@ -58,8 +59,11 @@ public class EditPaciente extends JInternalFrame {
 	private JFormattedTextField ftxDataNascimento;
 	private JComboBox<FormaPagamento> cbFormaPag;
 	private JFormattedTextField ftxCep;
-	private JComboBox<?> cbEstado;
+	private JComboBox<String> cbEstado;
 	private JButton btnAplicar;
+	
+	private JLabel lblFotoPaciente;
+	private JLabel lblCarregando; 
 	
 	private List<JComponent> grupoHabilitavel;
 	private List<JComponent> grupoCEP;
@@ -76,10 +80,25 @@ public class EditPaciente extends JInternalFrame {
 		} catch (ObjetoNaoExisteException o) {
 			paciente = new Paciente();
 		} catch (NumberFormatException | SQLException | IOException e) {
-			// TODO Auto-generated catch block
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro ao buscar dados de pacientes", JOptionPane.ERROR_MESSAGE);
 		}
 		this.populaDadosPaciente(paciente);
+	}
+	
+	private void buscaCEP() {
+		BuscaCEP bcep = new BuscaCEP(
+					this.ftxCep.getText(),
+					this.cbEstado,
+					this.txtCidade,
+					this.txtBairro,
+					this.txtRua,
+					this.lblCarregando
+				);
+		try {
+			bcep.Run();
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro ao buscar info CEP", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	private void populaDadosPaciente(Paciente paciente) {
@@ -193,7 +212,7 @@ public class EditPaciente extends JInternalFrame {
 		ImageIcon icone = new ImageIcon(getClass().getResource("/resources/defaultUserImage.png"));
 		Image img = icone.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
 		ImageIcon iconeRedimensionado = new ImageIcon(img);
-		JLabel lblFotoPaciente = new JLabel(iconeRedimensionado);
+		lblFotoPaciente = new JLabel(iconeRedimensionado);
 		lblFotoPaciente.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		lblFotoPaciente.setAlignmentX(Component.CENTER_ALIGNMENT);
 		panel_3.add(lblFotoPaciente);
@@ -230,6 +249,11 @@ public class EditPaciente extends JInternalFrame {
 		JLabel lblCep = new JLabel("CEP:");
 		
 		ftxCep = new JFormattedTextField();
+		ftxCep.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				buscaCEP();
+			}
+		});
 		
 		JLabel lblEstado = new JLabel("Estado:");
 		
@@ -257,15 +281,14 @@ public class EditPaciente extends JInternalFrame {
 		txtNumero = new JTextField();
 		txtNumero.setColumns(10);
 		
-		ImageIcon gifzin = new ImageIcon(getClass().getResource("/resources/loadingIcon.gif"));
-		Image gif = gifzin.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-		ImageIcon gifRedim = new ImageIcon(gif);
-		JLabel lblCarregando = new JLabel(gifRedim);
-		lblCarregando.setVisible(true);
+		ImageIcon gifzin = new ImageIcon(getClass().getResource("/resources/loadingIconRedim.gif"));
+		lblCarregando = new JLabel(gifzin);
+		lblCarregando.setVisible(false);
+		lblCarregando.setHorizontalAlignment(SwingConstants.LEFT);
+		lblCarregando.setAlignmentY(Component.TOP_ALIGNMENT);
 		
 		lblCarregando.setVerticalAlignment(SwingConstants.TOP);
 		lblCarregando.setBorder(null);
-		lblCarregando.setAlignmentX(0.5f);
 		
 		GroupLayout gl_zonaDados = new GroupLayout(zonaDados);
 		gl_zonaDados.setHorizontalGroup(
@@ -289,18 +312,19 @@ public class EditPaciente extends JInternalFrame {
 						.addComponent(txtBairro, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)
 						.addComponent(txtRua, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)
 						.addComponent(txtNumero, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(txtNome, GroupLayout.PREFERRED_SIZE, 409, GroupLayout.PREFERRED_SIZE)
 						.addComponent(cbEstado, GroupLayout.PREFERRED_SIZE, 55, GroupLayout.PREFERRED_SIZE)
-						.addComponent(txtCidade, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)
-						.addGroup(gl_zonaDados.createSequentialGroup()
-							.addGroup(gl_zonaDados.createParallelGroup(Alignment.TRAILING, false)
-								.addComponent(ftxCep, Alignment.LEADING)
-								.addComponent(cbFormaPag, Alignment.LEADING, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addComponent(ftxDataNascimento, Alignment.LEADING)
-								.addComponent(ftxTelefone, Alignment.LEADING)
-								.addComponent(cbSexo, Alignment.LEADING, 0, 137, Short.MAX_VALUE))
-							.addGap(18)
-							.addComponent(lblCarregando))
-						.addComponent(txtNome, GroupLayout.PREFERRED_SIZE, 409, GroupLayout.PREFERRED_SIZE))
+						.addGroup(gl_zonaDados.createParallelGroup(Alignment.TRAILING)
+							.addGroup(Alignment.LEADING, gl_zonaDados.createSequentialGroup()
+								.addGroup(gl_zonaDados.createParallelGroup(Alignment.TRAILING, false)
+									.addComponent(ftxCep, Alignment.LEADING)
+									.addComponent(cbFormaPag, Alignment.LEADING, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+									.addComponent(ftxDataNascimento, Alignment.LEADING)
+									.addComponent(ftxTelefone, Alignment.LEADING)
+									.addComponent(cbSexo, Alignment.LEADING, 0, 137, Short.MAX_VALUE))
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(lblCarregando))
+							.addComponent(txtCidade, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 253, GroupLayout.PREFERRED_SIZE)))
 					.addGap(263))
 		);
 		gl_zonaDados.setVerticalGroup(
@@ -327,15 +351,16 @@ public class EditPaciente extends JInternalFrame {
 						.addComponent(lblFormaPagamento)
 						.addComponent(cbFormaPag, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
 					.addGap(18)
-					.addGroup(gl_zonaDados.createParallelGroup(Alignment.TRAILING)
-						.addComponent(lblCarregando, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
-							.addComponent(lblCep)
-							.addComponent(ftxCep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-					.addGap(18)
-					.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblEstado)
-						.addComponent(cbEstado, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addGroup(gl_zonaDados.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_zonaDados.createSequentialGroup()
+							.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
+								.addComponent(lblCep)
+								.addComponent(ftxCep, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+							.addGap(18)
+							.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
+								.addComponent(lblEstado)
+								.addComponent(cbEstado, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+						.addComponent(lblCarregando, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE))
 					.addGap(18)
 					.addGroup(gl_zonaDados.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblCidade)
